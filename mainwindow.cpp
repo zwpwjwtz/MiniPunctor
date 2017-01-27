@@ -5,6 +5,7 @@
 #include <QLayout>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QFileDialog>
 
 
 #define PUNCTOR_TIME_DISPLAY_FORMAT "mm : ss . zzz"
@@ -53,6 +54,27 @@ QString timeTickToString(qint64 timeTick)
     ::sprintf(buf, "%02d", min);     temp.replace("mm", buf);
 
     return temp;
+}
+
+void MainWindow::saveFile()
+{
+    QString path = QFileDialog::getSaveFileName(
+                this,
+                "Save file as",
+                ".",
+                "Plain Text(*.txt)"
+    );
+    if (path.isEmpty())
+        return;
+
+    QList<QString> recordList;
+    QListWidget* listTimeline = ui->listTimeline;
+    for (int i=0; i<listTimeline->count(); i++)
+    {
+        recordList.append(listTimeline->item(i)->text());
+    }
+
+    currentFile.saveAs(recordList, path);
 }
 
 void MainWindow::showTime(qint64 timeTick)
@@ -175,4 +197,14 @@ void MainWindow::on_actionExit_triggered()
             return;
     }
     this->close();
+}
+
+void MainWindow::on_actionSave_File_triggered()
+{
+    saveFile();
+}
+
+void MainWindow::on_actionSave_File_As_triggered()
+{
+    saveFile();
 }

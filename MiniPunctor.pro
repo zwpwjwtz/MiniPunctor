@@ -32,11 +32,13 @@ DEFINES += QT_DEPRECATED_WARNINGS APP_VERSION=\\\"$$VERSION\\\"
 SOURCES += main.cpp\
         mainwindow.cpp \
     helpwindow.cpp \
-    buttonupdown.cpp
+    buttonupdown.cpp \
+    filecontainer.cpp
 
 HEADERS  += mainwindow.h \
     helpwindow.h \
-    buttonupdown.h
+    buttonupdown.h \
+    filecontainer.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \

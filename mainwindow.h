@@ -6,6 +6,7 @@
 #include <QTime>
 #include "buttonupdown.h"
 #include "helpwindow.h"
+#include "filecontainer.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,6 +20,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void showTime(qint64 timeTick);
+    void saveFile();
 
 private slots:
     void on_timer_timeout();
@@ -38,6 +40,10 @@ private slots:
 
     void on_actionExit_triggered();
 
+    void on_actionSave_File_triggered();
+
+    void on_actionSave_File_As_triggered();
+
 private:
     Ui::MainWindow *ui;
     HelpWindow help;
@@ -46,6 +52,7 @@ private:
     int timerState;
     qint64 currentTime;
     bool isPuncturing;
+    FileContainer currentFile;
 
     bool sureToExit(bool manualClose);
 
