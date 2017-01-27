@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "helpwindow.h"
+#include <QCloseEvent>
+#include <QLayout>
 #include <QListWidget>
 #include <QMessageBox>
-#include <QCloseEvent>
 
 
-#define PUNCTOR_TIME_DISPLAY_FORMAT "mm:ss.zzz"
+#define PUNCTOR_TIME_DISPLAY_FORMAT "mm : ss . zzz"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -14,6 +15,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->bUDMin->setText("Min");
+    ui->bUDSec->setText("Sec");
+    ui->bUDMsec->setText("Msec");
+
     connect(&timer,
             SIGNAL(timeout()),
             this,
@@ -69,11 +74,6 @@ bool MainWindow::sureToExit(bool manualClose)
     return true;
 }
 
-void MainWindow::on_timer_timeout()
-{
-    currentTime += timerInterval;
-    showTime(currentTime);
-}
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
@@ -85,6 +85,48 @@ void MainWindow::closeEvent(QCloseEvent* event)
         event->ignore();
 }
 
+void MainWindow::on_timer_timeout()
+{
+    currentTime += timerInterval;
+    showTime(currentTime);
+}
+
+void MainWindow::on_bUDMin_clicked(int button)
+{
+    if (button)
+    {
+        currentTime -= 60000;
+        if (currentTime < 0)
+            currentTime = 0;
+    }
+    else
+        currentTime += 60000;
+}
+
+void MainWindow::on_bUDSec_clicked(int button)
+{
+    if (button)
+    {
+        currentTime -= 1000;
+        if (currentTime < 0)
+            currentTime = 0;
+    }
+    else
+        currentTime += 1000;
+}
+
+void MainWindow::on_bUDMSec_clicked(int button)
+{
+    if (button)
+    {
+        currentTime -= 1;
+        if (currentTime < 0)
+            currentTime = 0;
+    }
+    else
+        currentTime += 1;
+}
+
 void MainWindow::on_buttonPunc_clicked()
 {
     ui->listTimeline->addItem(timeTickToString(currentTime));
@@ -93,19 +135,18 @@ void MainWindow::on_buttonPunc_clicked()
 void MainWindow::on_buttonStart_clicked()
 {
     switch (timerState) {
-    case 0:
-    case 2:
+    case 0: //Stop
+    case 2: //Pause
         timerState = 1;
         isPuncturing = true;
         timer.start();
-        ui->buttonStart->setText("Pause");
+        ui->buttonStart->setText("Resume");
         break;
-    case 1:
+    case 1: //Counting
         timerState = 2;
         isPuncturing =false;
         timer.stop();
-        currentTime = 0;
-        ui->buttonStart->setText("Resume");
+        ui->buttonStart->setText("Pause");
     default:
         break;
     }
@@ -114,9 +155,11 @@ void MainWindow::on_buttonStart_clicked()
 void MainWindow::on_buttonStop_clicked()
 {
     timerState = 0;
+    currentTime = 0;
     isPuncturing = false;
     timer.stop();
     ui->buttonStart->setText("Start");
+    showTime(0);
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -130,7 +173,6 @@ void MainWindow::on_actionExit_triggered()
     {
         if (!sureToExit(true))
             return;
-        timer.stop();
     }
     this->close();
 }

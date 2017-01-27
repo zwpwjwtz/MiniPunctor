@@ -61,7 +61,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>100</y>
+      <y>140</y>
       <width>101</width>
       <height>35</height>
      </rect>
@@ -74,7 +74,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>100</y>
+      <y>140</y>
       <width>101</width>
       <height>35</height>
      </rect>
@@ -87,9 +87,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>144</y>
+      <y>184</y>
       <width>211</width>
-      <height>91</height>
+      <height>71</height>
      </rect>
     </property>
     <property name="font">
@@ -107,9 +107,55 @@
       <x>230</x>
       <y>0</y>
       <width>261</width>
-      <height>241</height>
+      <height>261</height>
      </rect>
     </property>
+   </widget>
+   <widget class="QFrame" name="frameTimeAdj">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="buttonUpDown" name="bUDMin" native="true">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>61</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="buttonUpDown" name="bUDSec" native="true">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>0</y>
+       <width>61</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="buttonUpDown" name="bUDMsec" native="true">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>0</y>
+       <width>71</width>
+       <height>41</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -209,6 +255,14 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>buttonUpDown</class>
+   <extends>QWidget</extends>
+   <header>buttonupdown.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QTime>
+#include "buttonupdown.h"
 #include "helpwindow.h"
 
 namespace Ui {
@@ -21,6 +22,10 @@ public:
 
 private slots:
     void on_timer_timeout();
+
+    void on_bUDMin_clicked(int button);
+    void on_bUDSec_clicked(int button);
+    void on_bUDMSec_clicked(int button);
 
     void on_buttonPunc_clicked();
 
