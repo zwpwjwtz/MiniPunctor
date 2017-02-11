@@ -107,6 +107,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
         event->ignore();
 }
 
+void MainWindow::keyReleaseEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Space)
+        on_buttonPunc_clicked();
+}
+
 void MainWindow::on_timer_timeout()
 {
     currentTime += timerInterval;
@@ -123,6 +129,7 @@ void MainWindow::on_bUDMin_clicked(int button)
     }
     else
         currentTime += 60000;
+    showTime(currentTime);
 }
 
 void MainWindow::on_bUDSec_clicked(int button)
@@ -135,18 +142,20 @@ void MainWindow::on_bUDSec_clicked(int button)
     }
     else
         currentTime += 1000;
+    showTime(currentTime);
 }
 
 void MainWindow::on_bUDMSec_clicked(int button)
 {
     if (button)
     {
-        currentTime -= 1;
+        currentTime -= timerInterval;
         if (currentTime < 0)
             currentTime = 0;
     }
     else
-        currentTime += 1;
+        currentTime += timerInterval;
+    showTime(currentTime);
 }
 
 void MainWindow::on_buttonPunc_clicked()
@@ -181,7 +190,6 @@ void MainWindow::on_buttonStop_clicked()
     isPuncturing = false;
     timer.stop();
     ui->buttonStart->setText("Start");
-    showTime(0);
 }
 
 void MainWindow::on_actionAbout_triggered()
