@@ -1,12 +1,12 @@
 <RCC>
-    <qresource prefix="/icon">
-        <file>help.png</file>
-        <file>list-remove.png</file>
-        <file>list-add.png</file>
-        <file>go-up.png</file>
-        <file>go-down.png</file>
-        <file>edit-delete.png</file>
-        <file>list-edit.png</file>
-        <file>MiniPunctor.png</file>
+    <qresource prefix="/">
+        <file>icons/help.png</file>
+        <file>icons/list-remove.png</file>
+        <file>icons/list-add.png</file>
+        <file>icons/go-up.png</file>
+        <file>icons/go-down.png</file>
+        <file>icons/edit-delete.png</file>
+        <file>icons/list-edit.png</file>
+        <file>icons/MiniPunctor.png</file>
     </qresource>
 </RCC>

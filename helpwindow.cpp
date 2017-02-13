@@ -1,6 +1,8 @@
-#include <QPushButton>
 #include "helpwindow.h"
 #include "ui_helpwindow.h"
+#include <QPushButton>
+#include <QAbstractButton>
+
 
 HelpWindow::HelpWindow(QWidget *parent) :
     QDialog(parent),

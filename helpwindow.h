@@ -2,7 +2,6 @@
 #define HELPWINDOW_H
 
 #include <QDialog>
-#include <QAbstractButton>
 
 namespace Ui {
 class HelpWindow;

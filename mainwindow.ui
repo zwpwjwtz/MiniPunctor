@@ -10,12 +10,15 @@
     <height>300</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Mini Punctor</string>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowIcon">
    <iconset resource="icon.qrc">
-    <normaloff>:/icon/MiniPunctor.png</normaloff>:/icon/MiniPunctor.png</iconset>
+    <normaloff>:/icons/MiniPunctor.png</normaloff>:/icons/MiniPunctor.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QLabel" name="labelBanner">
@@ -190,7 +193,7 @@
     </property>
     <property name="icon">
      <iconset resource="icon.qrc">
-      <normaloff>:/icon/edit-delete.png</normaloff>:/icon/edit-delete.png</iconset>
+      <normaloff>:/icons/edit-delete.png</normaloff>:/icons/edit-delete.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -210,7 +213,7 @@
     </property>
     <property name="icon">
      <iconset resource="icon.qrc">
-      <normaloff>:/icon/list-remove.png</normaloff>:/icon/list-remove.png</iconset>
+      <normaloff>:/icons/list-remove.png</normaloff>:/icons/list-remove.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -230,7 +233,7 @@
     </property>
     <property name="icon">
      <iconset resource="icon.qrc">
-      <normaloff>:/icon/list-add.png</normaloff>:/icon/list-add.png</iconset>
+      <normaloff>:/icons/list-add.png</normaloff>:/icons/list-add.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -250,7 +253,7 @@
     </property>
     <property name="icon">
      <iconset resource="icon.qrc">
-      <normaloff>:/icon/go-up.png</normaloff>:/icon/go-up.png</iconset>
+      <normaloff>:/icons/go-up.png</normaloff>:/icons/go-up.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -270,7 +273,7 @@
     </property>
     <property name="icon">
      <iconset resource="icon.qrc">
-      <normaloff>:/icon/go-down.png</normaloff>:/icon/go-down.png</iconset>
+      <normaloff>:/icons/go-down.png</normaloff>:/icons/go-down.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -290,7 +293,7 @@
     </property>
     <property name="icon">
      <iconset resource="icon.qrc">
-      <normaloff>:/icon/list-edit.png</normaloff>:/icon/list-edit.png</iconset>
+      <normaloff>:/icons/list-edit.png</normaloff>:/icons/list-edit.png</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -389,8 +392,8 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset>
-     <normalon>:/icon/help.png</normalon>
+    <iconset theme="about.png">
+     <normalon>:/icons/help.png</normalon>
     </iconset>
    </property>
    <property name="text">
@@ -402,7 +405,7 @@
   </action>
   <action name="actionCopy">
    <property name="text">
-    <string>Copy</string>
+    <string>&amp;Copy</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -410,7 +413,7 @@
   </action>
   <action name="actionCut">
    <property name="text">
-    <string>Cut</string>
+    <string>C&amp;ut</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
@@ -418,7 +421,7 @@
   </action>
   <action name="actionPaste">
    <property name="text">
-    <string>Paste</string>
+    <string>&amp;Paste</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
@@ -426,7 +429,7 @@
   </action>
   <action name="actionDuplicate">
    <property name="text">
-    <string>Duplicate</string>
+    <string>&amp;Duplicate</string>
    </property>
   </action>
  </widget>
