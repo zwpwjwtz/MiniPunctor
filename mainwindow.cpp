@@ -11,6 +11,8 @@
 #define PUNCTOR_DISPLAY_TIME_FORMAT "mm : ss . zzz"
 
 #define PUNCTOR_FILE_SUFFIX_TXT "Plain Text (*.txt)(*.txt)"
+#define PUNCTOR_FILE_SUFFIX_LRC "Lyric file (*.lrc)(*.lrc)"
+#define PUNCTOR_FILE_SUFFIX_SRT "Subtitle file (*.srt)(*.srt)"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -237,7 +239,14 @@ void MainWindow::on_actionSave_File_triggered()
         on_actionSave_File_As_triggered();
         return;
     }
-    currentFile.save(currentList);
+    if (currentFile.save(currentList) != FileContainer::fileOK)
+    {
+        QMessageBox::critical(this, "Error while saving",
+                              "Cannot save file.\nPlease check "
+                              "if there is enough space on the disk,\n"
+                              "and you have the permission to write file.");
+        return;
+    }
     fileModified = false;
 }
 
@@ -247,12 +256,27 @@ void MainWindow::on_actionSave_File_As_triggered()
                     this,
                     "Save file as",
                     ".",
-                    PUNCTOR_FILE_SUFFIX_TXT);
+                    QString(PUNCTOR_FILE_SUFFIX_TXT).append(";;")
+                    .append(PUNCTOR_FILE_SUFFIX_LRC).append(";;")
+                    .append(PUNCTOR_FILE_SUFFIX_SRT));
     if (path.isEmpty())
         return;
 
-    currentFile.saveAs(currentList, path);
+    FileContainer::FileType oldType = currentFile.getFileType();
+    if (currentFile.saveAs(currentList, path) != FileContainer::fileOK)
+    {
+        QMessageBox::critical(this,"Error while saving file as",
+                              QString("Cannot save file as ")
+                              .append('"').append(path).append('"')
+                              .append("\nPlease check "
+                              "if there is enough space on the disk,\n"
+                              "and you have the permission to write file."));
+        currentFile.setFileType(oldType);
+        return;
+    }
     fileModified = false;
+    if (oldType != currentFile.getFileType())
+        updateList();
     updateTitle(path);
 }
 
@@ -282,11 +306,45 @@ void MainWindow::on_actionOpen_File_triggered()
                     this,
                     "Open file",
                     ".",
-                    PUNCTOR_FILE_SUFFIX_TXT);
+                    QString(PUNCTOR_FILE_SUFFIX_TXT).append(";;")
+                    .append(PUNCTOR_FILE_SUFFIX_LRC).append(";;")
+                    .append(PUNCTOR_FILE_SUFFIX_SRT));
     if (path.isEmpty())
         return;
 
-    currentFile.open(path, currentList, true);
+    FileContainer::FileErrorNumber openError;
+    openError = currentFile.open(path, currentList, false);
+    if (openError == FileContainer::openFail)
+    {
+        QMessageBox::critical(this,
+                              "Error while opening",
+                              "Cannot open file for reading.\n"
+                              "Please check if you have the permission "
+                              "to read this file.");
+        return;
+    }
+    else if (openError == FileContainer::recordError)
+    {
+        if (QMessageBox::warning(this,
+                                 "Error while reading file",
+                                 "This file contains record with incorrect "
+                                 "format.\nDo you really want to open it?",
+                                 QMessageBox::Yes | QMessageBox::No,
+                                 QMessageBox::No) != QMessageBox::Yes)
+            return;
+        openError = currentFile.open(path, currentList, true);
+        if (openError != FileContainer::fileOK)
+        {
+            QMessageBox::critical(this,
+                                  "Error while opening",
+                                  QString("We are not able to parse "
+                                  "the content of file \n""")
+                                  .append('"').append(path).append('"')
+                                  .append("\nThe file may be corrupted."));
+             return;
+         }
+    }
+
     fileModified = false;
     updateList();
     updateTitle(path);

@@ -4,6 +4,7 @@
 #include <QList>
 
 #define PUNCTOR_TIME_FORMAT_MSEC "zzz"
+#define PUNCTOR_TIME_FORMAT_CSEC "zz"
 #define PUNCTOR_TIME_FORMAT_SEC "ss"
 #define PUNCTOR_TIME_FORMAT_MIN "mm"
 #define PUNCTOR_TIME_FORMAT_HOUR "hh"

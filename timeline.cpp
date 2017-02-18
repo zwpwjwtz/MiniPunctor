@@ -161,6 +161,12 @@ QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
         ::sprintf(buf, getTimeFieldFormat(timeStamp, 3), timeStamp);
         tempTime.replace(PUNCTOR_TIME_FORMAT_MSEC, buf);
     }
+    else if (format.contains(PUNCTOR_TIME_FORMAT_CSEC))
+    {
+        tempInt = timeStamp / 10;
+        ::sprintf(buf, getTimeFieldFormat(tempInt, 2), tempInt);
+        tempTime.replace(PUNCTOR_TIME_FORMAT_CSEC, buf);
+    }
 
     return tempTime;
 }
@@ -170,26 +176,54 @@ qint64 TimeLine::stringToTimeStamp(QString str, QString format)
     if (format.isEmpty())
         format = PUNCTOR_TIME_FORMAT_DEFAULT;
     qint64 tempTime = 0;
-    int p;
+    int p, fraction;
+    bool OK = true, valid = false;
 
     p = format.indexOf(PUNCTOR_TIME_FORMAT_MSEC);
     if (p >= 0)
-        tempTime += str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_MSEC)).toInt();
+    {
+        fraction = str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_MSEC)).toInt(&OK);
+        tempTime += fraction;
+        valid = true;
+    }
+    else
+    {
+        p = format.indexOf(PUNCTOR_TIME_FORMAT_CSEC);
+        if (p >= 0 && OK)
+        {
+            fraction = str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_CSEC))
+                          .toInt(&OK);
+            tempTime += fraction * 10;
+            valid = true;
+        }
+    }
 
     p = format.indexOf(PUNCTOR_TIME_FORMAT_SEC);
-    if (p >= 0)
-        tempTime += str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_SEC))
-                    .toInt() * 1000;
+    if (p >= 0 && OK)
+    {
+        fraction = str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_SEC)).toInt(&OK);
+        tempTime += fraction * 1000;
+        valid = true;
+    }
 
     p = format.indexOf(PUNCTOR_TIME_FORMAT_MIN);
-    if (p >= 0)
-        tempTime += str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_MIN))
-                    .toInt() * 60000;
+    if (p >= 0 && OK)
+    {
+        fraction = str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_MIN)).toInt(&OK);
+        tempTime += fraction * 60000;
+        valid = true;
+    }
 
     p = format.indexOf(PUNCTOR_TIME_FORMAT_HOUR);
-    if (p >= 0)
-        tempTime += str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_HOUR))
-                    .toInt() * 3600000;
+    if (p >= 0 && OK)
+    {
+        fraction = str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_HOUR)).toInt(&OK);
+        tempTime += fraction * 3600000;
+        valid = true;
+    }
 
-    return tempTime;
+    if (OK && valid)
+        return tempTime;
+    else
+        return -1;
 }
