@@ -1,6 +1,4 @@
 #include "filecontainer.h"
-#include <QTextStream>
-
 
 #define PUNCTOR_FILE_BOM_UTF8 "\xEF\xBB\xBF"
 #define PUNCTOR_FILE_BOM_UTF16BE "\xFE\xFF"
@@ -14,6 +12,8 @@ FileContainer::FileContainer()
     varPlaceHolder[1] = PUNCTOR_FILE_FORMAT_VAR_TIME1;
     varPlaceHolder[2] = PUNCTOR_FILE_FORMAT_VAR_TIME2;
     varPlaceHolder[3] = PUNCTOR_FILE_FORMAT_VAR_CONTENT;
+
+    setFileType(PlainText);
 }
 
 FileContainer::FileErrorNumber FileContainer::open(QString path,
@@ -24,7 +24,6 @@ FileContainer::FileErrorNumber FileContainer::open(QString path,
     if (!file.open(QIODevice::ReadOnly))
         return openFail;
 
-    //QTextStream stream(&file);
     TimeTick tick;
     setFileType(guessFileType(path));
 

@@ -41,6 +41,10 @@ private slots:
     void on_actionOpen_File_triggered();
     void on_actionNew_File_triggered();
 
+    void on_buttonListMoveUp_clicked();
+
+    void on_buttonListMoveDown_clicked();
+
 private:
     Ui::MainWindow *ui;
     HelpWindow help;
@@ -59,8 +63,9 @@ private:
     bool sureToExit(bool manualClose);
 
 protected:
-    void closeEvent(QCloseEvent *);
-    void keyReleaseEvent(QKeyEvent *event);
+    void closeEvent(QCloseEvent* event);
+    void keyReleaseEvent(QKeyEvent* event);
+    void resizeEvent(QResizeEvent* event);
 };
 
 #endif // MAINWINDOW_H

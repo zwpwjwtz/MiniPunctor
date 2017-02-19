@@ -1,5 +1,8 @@
 #include "timeline.h"
 
+
+const char* Punctor_getTimeFieldFormat(int value, int minLength);
+
 TimeLine::TimeLine()
 {
 }
@@ -103,7 +106,7 @@ QString TimeLine::getUnusedId()
         return "";
 }
 
-const char* getTimeFieldFormat(int value, int minLength)
+const char* Punctor_getTimeFieldFormat(int value, int minLength)
 {
     if (value < 10 && minLength < 2)
         return "%d";
@@ -127,7 +130,6 @@ const char* getTimeFieldFormat(int value, int minLength)
         return "";
 }
 
-
 QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
 {
     QString tempTime(format);
@@ -138,33 +140,33 @@ QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
     if (format.contains(PUNCTOR_TIME_FORMAT_HOUR))
     {
         tempInt = timeStamp / 3600000;
-        ::sprintf(buf, getTimeFieldFormat(tempInt, 2), tempInt);
+        std::sprintf(buf, Punctor_getTimeFieldFormat(tempInt, 2), tempInt);
         tempTime.replace(PUNCTOR_TIME_FORMAT_HOUR, buf);
         timeStamp %= 3600000;
     }
     if (format.contains(PUNCTOR_TIME_FORMAT_MIN))
     {
         tempInt = timeStamp / 60000;
-        ::sprintf(buf, getTimeFieldFormat(tempInt, 2), tempInt);
+        std::sprintf(buf, Punctor_getTimeFieldFormat(tempInt, 2), tempInt);
         tempTime.replace(PUNCTOR_TIME_FORMAT_MIN, buf);
         timeStamp %= 60000;
     }
     if (format.contains(PUNCTOR_TIME_FORMAT_SEC))
     {
         tempInt = timeStamp / 1000;
-        ::sprintf(buf, getTimeFieldFormat(tempInt, 2), tempInt);
+        std::sprintf(buf, Punctor_getTimeFieldFormat(tempInt, 2), tempInt);
         tempTime.replace(PUNCTOR_TIME_FORMAT_SEC, buf);
         timeStamp %= 1000;
     }
     if (format.contains(PUNCTOR_TIME_FORMAT_MSEC))
     {
-        ::sprintf(buf, getTimeFieldFormat(timeStamp, 3), timeStamp);
+        std::sprintf(buf, Punctor_getTimeFieldFormat(timeStamp, 3), timeStamp);
         tempTime.replace(PUNCTOR_TIME_FORMAT_MSEC, buf);
     }
     else if (format.contains(PUNCTOR_TIME_FORMAT_CSEC))
     {
         tempInt = timeStamp / 10;
-        ::sprintf(buf, getTimeFieldFormat(tempInt, 2), tempInt);
+        std::sprintf(buf, Punctor_getTimeFieldFormat(tempInt, 2), tempInt);
         tempTime.replace(PUNCTOR_TIME_FORMAT_CSEC, buf);
     }
 

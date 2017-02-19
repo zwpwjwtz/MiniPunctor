@@ -15,6 +15,9 @@
 #define PUNCTOR_FILE_SUFFIX_SRT "Subtitle file (*.srt)(*.srt)"
 
 
+bool Punctor_getSelectedItemIndex(QListWidget* list,
+                                  QList<int>& indexList);
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -80,6 +83,9 @@ void MainWindow::updateList()
         content = TimeLine::timeStampToString(currentList[i].startTime,
                                               currentFile.getTimeFormat());
         content.append("  ").append(currentList[i].content);
+        content.replace("\r\n", "↵");
+        content.replace('\n', "↵");
+        content.replace('\r', "↵");
         ui->listTimeline->addItem(content);
     }
 }
@@ -132,6 +138,19 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
     if (event->key() == Qt::Key_Space)
         on_buttonPunc_clicked();
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+    ui->buttonPunc->resize(ui->buttonPunc->width(),
+                           this->height() - ui->buttonPunc->pos().y() - 40);
+    ui->listTimeline->resize(this->width() - ui->listTimeline->pos().x() - 10,
+                             this->height() - ui->listTimeline->pos().y() - 40);
+    ui->frameListOperation->resize(ui->listTimeline->width(),
+                                   ui->frameListOperation->height());
+    ui->frameListButtonRight->move(ui->frameListOperation->width() -
+                                   ui->frameListButtonRight->width(), 0);
+    event->accept();
 }
 
 void MainWindow::on_timer_timeout()
@@ -394,14 +413,11 @@ void MainWindow::on_buttonListClear_clicked()
 void MainWindow::on_buttonListRemove_clicked()
 {
     QList<int> indexList;
-    QList<QListWidgetItem *> itemList = ui->listTimeline->selectedItems();
-    if (itemList.count() < 1)
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
         return;
 
+    QList<QListWidgetItem *> itemList(ui->listTimeline->selectedItems());
     QList<QListWidgetItem *>::const_iterator i;
-    for(i=itemList.constBegin(); i!=itemList.constEnd(); i++)
-        indexList.append(ui->listTimeline->row(*i));
-
     for(i=itemList.constBegin(); i!=itemList.constEnd(); i++)
     {
         ui->listTimeline->removeItemWidget(*i);
@@ -420,16 +436,68 @@ void MainWindow::on_buttonListInsert_clicked()
 {
     TimeTick tick;
     tick.startTime = tick.endTime = currentTime;
-    int i;
 
-    QList<QListWidgetItem *> itemList = ui->listTimeline->selectedItems();
-    if (itemList.isEmpty())
-        i = 0;
-    else
-        i = ui->listTimeline->row(itemList.last());
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+        indexList.append(0);
 
-    ui->listTimeline->insertItem(i,TimeLine::timeStampToString(
-                                     currentTime, currentFile.getTimeFormat()));
-    currentList.addItem(tick, i);
+    ui->listTimeline->insertItem(indexList.last(),
+                                 TimeLine::timeStampToString(currentTime,
+                                                 currentFile.getTimeFormat()));
+    currentList.addItem(tick, indexList.last());
     fileModified = true;
+}
+
+void MainWindow::on_buttonListMoveUp_clicked()
+{
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+        return;
+
+    std::sort(indexList.begin(), indexList.end());
+    int c = 0;
+    while (!indexList.isEmpty() && indexList.first() == c)
+    {
+        c++;
+        indexList.removeFirst();
+    }
+
+    QList<int>::const_iterator i;
+    for(i=indexList.constBegin(); i!=indexList.constEnd(); i++)
+        currentList.swapItem(*i - 1, *i);
+
+    updateList();
+}
+
+void MainWindow::on_buttonListMoveDown_clicked()
+{
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+        return;
+
+    std::sort(indexList.begin(), indexList.end());
+    int c = currentList.count() - 1;
+    while (!indexList.isEmpty() && indexList.last() == c)
+    {
+        c--;
+        indexList.removeLast();
+    }
+
+    QList<int>::const_iterator i;
+    for(i=indexList.constEnd() - 1; i>=indexList.constBegin(); i--)
+        currentList.swapItem(*i, *i + 1);
+
+    updateList();
+}
+
+bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)
+{
+    QList<QListWidgetItem *> itemList(list->selectedItems());
+    if (itemList.count() < 1)
+        return false;
+
+    QList<QListWidgetItem *>::const_iterator i;
+    for(i=itemList.constBegin(); i!=itemList.constEnd(); i++)
+        indexList.append(list->row(*i));
+    return true;
 }
