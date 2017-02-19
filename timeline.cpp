@@ -24,7 +24,7 @@ TimeTick& TimeLine::getItemByIndex(int index)
 
 void TimeLine::addItem(TimeTick& tick, int index)
 {
-    if (tick.id.isEmpty())
+    if (existId(tick.id))
         tick.id = getUnusedId();
     list.insert(index, tick);
 }
@@ -45,6 +45,8 @@ int TimeLine::addItemByTime(qint64 timeStamp)
 
 void TimeLine::appendItem(TimeTick& tick)
 {
+    if (existId(tick.id))
+        tick.id = getUnusedId();
     list.append(tick);
 }
 
@@ -55,6 +57,11 @@ void TimeLine::removeItem(int index)
 
 void TimeLine::updateItem(TimeTick& tick, int index)
 {
+    if (index < 0 || index >= list.count())
+        return;
+
+    if (tick.id != list[index].id && existId(tick.id))
+        tick.id = getUnusedId();
     list.replace(index, tick);
 }
 void TimeLine::swapItem(int index1, int index2)
@@ -64,6 +71,9 @@ void TimeLine::swapItem(int index1, int index2)
 
 bool TimeLine::existId(QString id)
 {
+    if (id.isEmpty())
+        return true;
+
     bool found = false;
     QList<TimeTick>::const_iterator i;
     for(i=list.constBegin(); i!=list.constEnd(); i++)

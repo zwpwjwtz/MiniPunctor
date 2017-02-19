@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include "helpwindow.h"
+#include "tickeditwindow.h"
 #include "filecontainer.h"
 
 
@@ -28,8 +29,11 @@ private slots:
 
     void on_buttonPunc_clicked();
     void on_buttonStart_clicked();
-    void on_buttonStop_clicked();
-    
+    void on_buttonStop_clicked();    
+
+    void on_buttonListMoveUp_clicked();
+    void on_buttonListMoveDown_clicked();
+    void on_buttonListEdit_clicked();
     void on_buttonListClear_clicked();
     void on_buttonListRemove_clicked();
     void on_buttonListInsert_clicked();
@@ -41,13 +45,10 @@ private slots:
     void on_actionOpen_File_triggered();
     void on_actionNew_File_triggered();
 
-    void on_buttonListMoveUp_clicked();
-
-    void on_buttonListMoveDown_clicked();
-
 private:
     Ui::MainWindow *ui;
-    HelpWindow help;
+    HelpWindow* help;
+    TickEditWindow* tickEditor;
     QTimer timer;
     int timerInterval;
     int timerState;
@@ -58,8 +59,10 @@ private:
     TimeLine currentList;
 
     void showTime(qint64 timeTick);
+    QString& tickToItemText(TimeTick& tick);
     void updateTitle(QString fileName);
     void updateList();
+    void updateListItem(int index);
     bool sureToExit(bool manualClose);
 
 protected:

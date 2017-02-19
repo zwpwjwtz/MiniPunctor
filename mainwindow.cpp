@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->bUDMin->setText("Min");
     ui->bUDSec->setText("Sec");
     ui->bUDMsec->setText("Msec");
+    help = NULL;
+    tickEditor = NULL;
 
     connect(&timer,
             SIGNAL(timeout()),
@@ -55,6 +57,17 @@ void MainWindow::showTime(qint64 timeTick)
                                timeTick, PUNCTOR_DISPLAY_TIME_FORMAT));
 }
 
+QString& MainWindow::tickToItemText(TimeTick &tick)
+{
+    static QString content;
+    content = TimeLine::timeStampToString(tick.startTime,
+                                          currentFile.getTimeFormat());
+    content.append("  ").append(tick.content);
+    content.replace("\r\n", "↵");
+    content.replace('\n', "↵");
+    content.replace('\r', "↵");
+    return content;
+}
 
 void MainWindow::updateTitle(QString fileName)
 {
@@ -77,17 +90,14 @@ void MainWindow::updateList()
 {
     ui->listTimeline->clear();
     int count = currentList.count();
-    QString content;
     for(int i=0; i<count; i++)
-    {
-        content = TimeLine::timeStampToString(currentList[i].startTime,
-                                              currentFile.getTimeFormat());
-        content.append("  ").append(currentList[i].content);
-        content.replace("\r\n", "↵");
-        content.replace('\n', "↵");
-        content.replace('\r', "↵");
-        ui->listTimeline->addItem(content);
-    }
+        ui->listTimeline->addItem(tickToItemText(currentList[i]));
+}
+
+void MainWindow::updateListItem(int index)
+{
+    QListWidgetItem* item = ui->listTimeline->item(index);
+    item->setText(tickToItemText(currentList[index]));
 }
 
 bool MainWindow::sureToExit(bool manualClose)
@@ -128,7 +138,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     if (sureToExit(false))
     {
-        help.close();
+        if (help)
+            help->close();
+        delete help;
+        if (tickEditor)
+            tickEditor->close();
+        delete tickEditor;
     }
     else
         event->ignore();
@@ -238,7 +253,9 @@ void MainWindow::on_buttonStop_clicked()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    help.show();
+    if (!help)
+        help = new HelpWindow;
+    help->show();
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -488,6 +505,35 @@ void MainWindow::on_buttonListMoveDown_clicked()
         currentList.swapItem(*i, *i + 1);
 
     updateList();
+}
+
+void MainWindow::on_buttonListEdit_clicked()
+{
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+    {
+        QMessageBox::information(this, "No time tick selected",
+                                 "Please select one time tick in the list "
+                                 "before editing it.");
+        return;
+    }
+
+    if (!tickEditor)
+        tickEditor = new TickEditWindow;
+
+    int i = indexList.first();
+    TimeTick& tick = currentList[i];
+    tickEditor->setTimeTick(tick);
+    tickEditor->timerInterval = timerInterval;
+    tickEditor->timeFormat = currentFile.getTimeFormat();
+    tickEditor->exec();
+
+    tick = tickEditor->getTimeTick();
+    if (tickEditor->isModified())
+    {
+        currentList[i] = tick;
+        updateListItem(i);
+    }
 }
 
 bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)

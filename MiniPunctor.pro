@@ -12,10 +12,10 @@ TARGET = MiniPunctor
 TEMPLATE = app
 
 VER_MAJ = 1
-VER_MIN = 1
+VER_MIN = 2
 VER_PAT = 0
-VERSION = 1.1.0
-VERSION_PE_HEADER = 1.1.0
+VERSION = 1.2.0
+VERSION_PE_HEADER = 1.2.0
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -34,18 +34,21 @@ SOURCES += main.cpp\
     helpwindow.cpp \
     buttonupdown.cpp \
     filecontainer.cpp \
-    timeline.cpp
+    timeline.cpp \
+    tickeditwindow.cpp
 
 HEADERS  += mainwindow.h \
     helpwindow.h \
     buttonupdown.h \
     filecontainer.h \
     timeline.h \
-    file_format.h
+    file_format.h \
+    tickeditwindow.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
-    buttonupdown.ui
+    buttonupdown.ui \
+    tickeditwindow.ui
 
 RESOURCES += \
     icon.qrc
