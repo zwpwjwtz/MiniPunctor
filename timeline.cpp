@@ -1,4 +1,5 @@
 #include "timeline.h"
+#include <cstdio>
 
 
 const char* Punctor_getTimeFieldFormat(int value, int minLength);
@@ -146,7 +147,7 @@ QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
     int tempInt;
     static char buf[8];
 
-    timeStamp = ::abs(timeStamp) % 360000000;
+    timeStamp = std::abs(timeStamp) % 360000000;
     if (format.contains(PUNCTOR_TIME_FORMAT_HOUR))
     {
         tempInt = timeStamp / 3600000;

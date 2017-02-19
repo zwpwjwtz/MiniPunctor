@@ -1,6 +1,7 @@
 #ifndef TIMELINE_H
 #define TIMELINE_H
 
+#include <QString>
 #include <QList>
 
 #define PUNCTOR_TIME_FORMAT_MSEC "zzz"
