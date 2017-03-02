@@ -13,12 +13,12 @@ int TimeLine::count()
     return list.count();
 }
 
-TimeTick &TimeLine::operator [](int index)
+const TimeTick &TimeLine::operator [](int index)
 {
     return list[index];
 }
 
-TimeTick& TimeLine::getItemByIndex(int index)
+const TimeTick& TimeLine::getItemByIndex(int index)
 {
     return list[index];
 }
@@ -62,7 +62,10 @@ void TimeLine::updateItem(TimeTick& tick, int index)
         return;
 
     if (tick.id != list[index].id && existId(tick.id))
+    {
+        list[index].id.clear();
         tick.id = getUnusedId();
+    }
     list.replace(index, tick);
 }
 void TimeLine::swapItem(int index1, int index2)
@@ -95,7 +98,7 @@ void TimeLine::clear()
 
 QString TimeLine::getUnusedId()
 {
-    uint tempNum = list.count() + 1;
+    uint tempNum = 1;
     bool found = false;
 
     QList<TimeTick>::const_iterator i;

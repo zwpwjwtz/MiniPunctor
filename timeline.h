@@ -26,8 +26,8 @@ class TimeLine
 public:
     TimeLine();
     int count();
-    TimeTick& operator [](int index);
-    TimeTick& getItemByIndex(int index);
+    const TimeTick &operator [](int index);
+    const TimeTick& getItemByIndex(int index);
     void addItem(TimeTick& tick, int index);
     int addItemByTime(qint64 timeStamp);
     void appendItem(TimeTick& tick);

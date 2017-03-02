@@ -44,6 +44,10 @@ private slots:
     void on_actionSave_File_As_triggered();
     void on_actionOpen_File_triggered();
     void on_actionNew_File_triggered();
+    void on_actionCopy_triggered();
+    void on_actionCut_triggered();
+    void on_actionPaste_triggered();
+    void on_actionDuplicate_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -57,12 +61,15 @@ private:
     bool fileModified;
     FileContainer currentFile;
     TimeLine currentList;
+    int lastSelectedIndex;
+    bool isCutting;
 
     void showTime(qint64 timeTick);
-    QString& tickToItemText(TimeTick& tick);
+    QString& tickToItemText(const TimeTick &tick);
     void updateTitle(QString fileName);
     void updateList();
     void updateListItem(int index);
+    void moveSelectedArea(int delta);
     bool sureToExit(bool manualClose);
 
 protected:

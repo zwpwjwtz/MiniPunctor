@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     isPuncturing = false;
     fileModified = false;
+    lastSelectedIndex = 0;
 }
 
 MainWindow::~MainWindow()
@@ -57,7 +58,7 @@ void MainWindow::showTime(qint64 timeTick)
                                timeTick, PUNCTOR_DISPLAY_TIME_FORMAT));
 }
 
-QString& MainWindow::tickToItemText(TimeTick &tick)
+QString& MainWindow::tickToItemText(const TimeTick &tick)
 {
     static QString content;
     content = TimeLine::timeStampToString(tick.startTime,
@@ -88,16 +89,51 @@ void MainWindow::updateTitle(QString fileName)
 
 void MainWindow::updateList()
 {
+    QList<int> indexList;
+    Punctor_getSelectedItemIndex(ui->listTimeline, indexList);
+
     ui->listTimeline->clear();
     int count = currentList.count();
     for(int i=0; i<count; i++)
         ui->listTimeline->addItem(tickToItemText(currentList[i]));
+
+    QList<int>::const_iterator i;
+    for(i=indexList.constBegin(); i!=indexList.constEnd(); i++)
+    {
+        if (*i >= ui->listTimeline->count())
+            break;
+        ui->listTimeline->item(*i)->setSelected(true);
+    }
 }
 
 void MainWindow::updateListItem(int index)
 {
     QListWidgetItem* item = ui->listTimeline->item(index);
     item->setText(tickToItemText(currentList[index]));
+}
+
+void MainWindow::moveSelectedArea(int delta)
+{
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+        return;
+
+    QList<int>::iterator i;
+    for(i=indexList.begin(); i!=indexList.end(); i++)
+    {
+        *i += delta;
+        if (*i < 0)
+            *i = 0;
+        else if (*i >= ui->listTimeline->count())
+            *i = ui->listTimeline->count() - 1;
+    }
+    indexList = indexList.toSet().toList();
+
+    ui->listTimeline->clearSelection();
+    for(i=indexList.begin(); i!=indexList.end(); i++)
+    {
+        ui->listTimeline->item(*i)->setSelected(true);
+    }
 }
 
 bool MainWindow::sureToExit(bool manualClose)
@@ -382,6 +418,7 @@ void MainWindow::on_actionOpen_File_triggered()
     }
 
     fileModified = false;
+    lastSelectedIndex = 0;
     updateList();
     updateTitle(path);
 }
@@ -408,9 +445,11 @@ void MainWindow::on_actionNew_File_triggered()
         }
     }
     currentList.clear();
-    ui->listTimeline->clear();
     currentFile.close();
     fileModified = false;
+    lastSelectedIndex = 0;
+
+    ui->listTimeline->clear();
 }
 
 void MainWindow::on_buttonListClear_clicked()
@@ -484,6 +523,7 @@ void MainWindow::on_buttonListMoveUp_clicked()
         currentList.swapItem(*i - 1, *i);
 
     updateList();
+    moveSelectedArea(-1);
 }
 
 void MainWindow::on_buttonListMoveDown_clicked()
@@ -505,6 +545,7 @@ void MainWindow::on_buttonListMoveDown_clicked()
         currentList.swapItem(*i, *i + 1);
 
     updateList();
+    moveSelectedArea(1);
 }
 
 void MainWindow::on_buttonListEdit_clicked()
@@ -513,7 +554,7 @@ void MainWindow::on_buttonListEdit_clicked()
     if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
     {
         QMessageBox::information(this, "No time tick selected",
-                                 "Please select one time tick in the list "
+                                 "Please select one time tick from the list "
                                  "before editing it.");
         return;
     }
@@ -522,7 +563,7 @@ void MainWindow::on_buttonListEdit_clicked()
         tickEditor = new TickEditWindow;
 
     int i = indexList.first();
-    TimeTick& tick = currentList[i];
+    TimeTick tick = currentList[i];
     tickEditor->setTimeTick(tick);
     tickEditor->timerInterval = timerInterval;
     tickEditor->timeFormat = currentFile.getTimeFormat();
@@ -531,9 +572,67 @@ void MainWindow::on_buttonListEdit_clicked()
     tick = tickEditor->getTimeTick();
     if (tickEditor->isModified())
     {
-        currentList[i] = tick;
+        currentList.updateItem(tick, i);
         updateListItem(i);
     }
+}
+
+void MainWindow::on_actionCopy_triggered()
+{
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+    {
+        QMessageBox::information(this, "No time tick selected",
+                                 "Please select one time tick from the list.");
+        return;
+    }
+    if (indexList.count() > 1)
+    {
+        QMessageBox::warning(this, "More than one time tick selected",
+                             "Please select only one time tick.");
+        return;
+    }
+    lastSelectedIndex = indexList.first();
+    isCutting = false;
+}
+
+void MainWindow::on_actionCut_triggered()
+{
+    on_actionCopy_triggered();
+    isCutting = true;
+}
+
+void MainWindow::on_actionPaste_triggered()
+{
+    if (lastSelectedIndex < 0)
+        return;
+
+    int insertPos = 0;
+    QList<int> indexList;
+    if (Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+        insertPos = indexList.first();
+
+    TimeTick tempItem = currentList[lastSelectedIndex];
+    if (isCutting)
+    {
+        currentList.removeItem(lastSelectedIndex);
+        lastSelectedIndex = -1;
+    }
+    else
+    {
+        if (insertPos <= lastSelectedIndex)
+            lastSelectedIndex++;
+    }
+    currentList.addItem(tempItem, insertPos);
+    fileModified = true;
+
+    updateList();
+}
+
+void MainWindow::on_actionDuplicate_triggered()
+{
+    on_actionCopy_triggered();
+    on_actionPaste_triggered();
 }
 
 bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)
