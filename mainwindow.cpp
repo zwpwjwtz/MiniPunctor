@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->bUDMsec->setText("Msec");
     help = NULL;
     tickEditor = NULL;
+    menuTimeline = NULL;
 
     connect(&timer,
             SIGNAL(timeout()),
@@ -42,9 +43,12 @@ MainWindow::MainWindow(QWidget *parent) :
     showTime(currentTime);
     updateTitle("");
 
+    lastOpeningPath = ".";
+    lastSavingPath = ".";
+
     isPuncturing = false;
     fileModified = false;
-    lastSelectedIndex = 0;
+    lastSelectedIndex = -1;
 }
 
 MainWindow::~MainWindow()
@@ -180,6 +184,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
         if (tickEditor)
             tickEditor->close();
         delete tickEditor;
+        if (menuTimeline)
+            delete menuTimeline;
     }
     else
         event->ignore();
@@ -267,13 +273,13 @@ void MainWindow::on_buttonStart_clicked()
         timerState = 1;
         isPuncturing = true;
         timer.start();
-        ui->buttonStart->setText("Resume");
+        ui->buttonStart->setText("Pause");
         break;
     case 1: //Counting
         timerState = 2;
         isPuncturing =false;
         timer.stop();
-        ui->buttonStart->setText("Pause");
+        ui->buttonStart->setText("Resume");
     default:
         break;
     }
@@ -324,15 +330,19 @@ void MainWindow::on_actionSave_File_triggered()
 
 void MainWindow::on_actionSave_File_As_triggered()
 {
+    if (lastSavingFilter.isEmpty())
+        lastSavingFilter = lastOpeningFilter;
     QString path = QFileDialog::getSaveFileName(
                     this,
                     "Save file as",
-                    ".",
+                    lastSavingPath,
                     QString(PUNCTOR_FILE_SUFFIX_TXT).append(";;")
                     .append(PUNCTOR_FILE_SUFFIX_LRC).append(";;")
-                    .append(PUNCTOR_FILE_SUFFIX_SRT));
+                    .append(PUNCTOR_FILE_SUFFIX_SRT),
+                    &lastSavingFilter);
     if (path.isEmpty())
         return;
+    lastSavingPath = path;
 
     FileContainer::FileType oldType = currentFile.getFileType();
     if (currentFile.saveAs(currentList, path) != FileContainer::fileOK)
@@ -377,12 +387,14 @@ void MainWindow::on_actionOpen_File_triggered()
     QString path = QFileDialog::getOpenFileName(
                     this,
                     "Open file",
-                    ".",
+                    lastOpeningPath,
                     QString(PUNCTOR_FILE_SUFFIX_TXT).append(";;")
                     .append(PUNCTOR_FILE_SUFFIX_LRC).append(";;")
-                    .append(PUNCTOR_FILE_SUFFIX_SRT));
+                    .append(PUNCTOR_FILE_SUFFIX_SRT),
+                    &lastOpeningFilter);
     if (path.isEmpty())
         return;
+    lastOpeningPath = path;
 
     FileContainer::FileErrorNumber openError;
     openError = currentFile.open(path, currentList, false);
@@ -490,18 +502,7 @@ void MainWindow::on_buttonListRemove_clicked()
 
 void MainWindow::on_buttonListInsert_clicked()
 {
-    TimeTick tick;
-    tick.startTime = tick.endTime = currentTime;
-
-    QList<int> indexList;
-    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
-        indexList.append(0);
-
-    ui->listTimeline->insertItem(indexList.last(),
-                                 TimeLine::timeStampToString(currentTime,
-                                                 currentFile.getTimeFormat()));
-    currentList.addItem(tick, indexList.last());
-    fileModified = true;
+    on_actionCreate_tick_behind_triggered();
 }
 
 void MainWindow::on_buttonListMoveUp_clicked()
@@ -577,29 +578,70 @@ void MainWindow::on_buttonListEdit_clicked()
     }
 }
 
-void MainWindow::on_actionCopy_triggered()
+void MainWindow::on_listTimeline_doubleClicked(const QModelIndex &index)
+{
+    if (!index.isValid())
+        return;
+    on_buttonListEdit_clicked();
+}
+
+void MainWindow::on_listTimeline_customContextMenuRequested(const QPoint &pos)
+{
+    if (pos.isNull())
+        return;
+
+    if (menuTimeline == NULL)
+    {
+        menuTimeline = new QMenu(ui->listTimeline);
+        QAction* action = new QAction("&Cut");
+        connect(action, SIGNAL(triggered(bool)),
+                this, SLOT(on_actionCut_triggered()));
+        menuTimeline->addAction(action);
+        action = new QAction("&Copy");
+        connect(action, SIGNAL(triggered(bool)),
+                this, SLOT(on_actionCopy_triggered()));
+        menuTimeline->addAction(action);
+        action = new QAction("&Paste");
+        connect(action, SIGNAL(triggered(bool)),
+                this, SLOT(on_actionPaste_triggered()));
+        menuTimeline->addAction(action);
+        action = new QAction("&Duplicate");
+        connect(action, SIGNAL(triggered(bool)),
+                this, SLOT(on_actionDuplicate_triggered()));
+        menuTimeline->addAction(action);
+    }
+    menuTimeline->exec(QCursor::pos());
+}
+
+bool MainWindow::on_actionCopy_triggered()
 {
     QList<int> indexList;
     if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
     {
         QMessageBox::information(this, "No time tick selected",
                                  "Please select one time tick from the list.");
-        return;
+        return false;
     }
     if (indexList.count() > 1)
     {
         QMessageBox::warning(this, "More than one time tick selected",
                              "Please select only one time tick.");
-        return;
+        return false;
     }
     lastSelectedIndex = indexList.first();
     isCutting = false;
+    return true;
 }
 
-void MainWindow::on_actionCut_triggered()
+bool MainWindow::on_actionCut_triggered()
 {
-    on_actionCopy_triggered();
-    isCutting = true;
+    if (on_actionCopy_triggered())
+    {
+        isCutting = true;
+        return true;
+    }
+    else
+        return false;
 }
 
 void MainWindow::on_actionPaste_triggered()
@@ -631,8 +673,42 @@ void MainWindow::on_actionPaste_triggered()
 
 void MainWindow::on_actionDuplicate_triggered()
 {
-    on_actionCopy_triggered();
-    on_actionPaste_triggered();
+    int oldSelectedIndex = lastSelectedIndex;
+    if (on_actionCopy_triggered())
+        on_actionPaste_triggered();
+    lastSelectedIndex = oldSelectedIndex;
+}
+
+void MainWindow::on_actionInsert_before_triggered()
+{
+    TimeTick tick;
+    tick.startTime = tick.endTime = currentTime;
+
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+        indexList.append(0);
+
+    ui->listTimeline->insertItem(indexList.last(),
+                                 TimeLine::timeStampToString(currentTime,
+                                                 currentFile.getTimeFormat()));
+    currentList.addItem(tick, indexList.first());
+    fileModified = true;
+}
+
+void MainWindow::on_actionCreate_tick_behind_triggered()
+{
+    TimeTick tick;
+    tick.startTime = tick.endTime = currentTime;
+
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+        indexList.append(ui->listTimeline->count());
+
+    ui->listTimeline->insertItem(indexList.last() + 1,
+                                 TimeLine::timeStampToString(currentTime,
+                                                 currentFile.getTimeFormat()));
+    currentList.addItem(tick, indexList.last() + 1);
+    fileModified = true;
 }
 
 bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)

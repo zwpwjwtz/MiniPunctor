@@ -88,6 +88,9 @@
     <property name="focusPolicy">
      <enum>Qt::TabFocus</enum>
     </property>
+    <property name="toolTip">
+     <string>Start / pause timer</string>
+    </property>
     <property name="text">
      <string>Start !</string>
     </property>
@@ -103,6 +106,9 @@
     </property>
     <property name="focusPolicy">
      <enum>Qt::TabFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Stop timer</string>
     </property>
     <property name="text">
      <string>Stop</string>
@@ -122,6 +128,9 @@
       <pointsize>20</pointsize>
      </font>
     </property>
+    <property name="toolTip">
+     <string>Insert current time tick to list</string>
+    </property>
     <property name="text">
      <string>Puncture !</string>
     </property>
@@ -134,6 +143,9 @@
       <width>261</width>
       <height>231</height>
      </rect>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::CustomContextMenu</enum>
     </property>
     <property name="selectionMode">
      <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -163,6 +175,9 @@
        <height>41</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>Adjust minute</string>
+     </property>
     </widget>
     <widget class="buttonUpDown" name="bUDSec" native="true">
      <property name="geometry">
@@ -173,6 +188,9 @@
        <height>41</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>Adjust second</string>
+     </property>
     </widget>
     <widget class="buttonUpDown" name="bUDMsec" native="true">
      <property name="geometry">
@@ -182,6 +200,9 @@
        <width>71</width>
        <height>41</height>
       </rect>
+     </property>
+     <property name="toolTip">
+      <string>Adjust millisecond</string>
      </property>
     </widget>
    </widget>
@@ -224,6 +245,9 @@
         <height>31</height>
        </rect>
       </property>
+      <property name="toolTip">
+       <string>Edit selected item</string>
+      </property>
       <property name="icon">
        <iconset resource="icon.qrc">
         <normaloff>:/icons/list-edit.png</normaloff>:/icons/list-edit.png</iconset>
@@ -244,6 +268,9 @@
         <height>31</height>
        </rect>
       </property>
+      <property name="toolTip">
+       <string>Move selected item down</string>
+      </property>
       <property name="icon">
        <iconset resource="icon.qrc">
         <normaloff>:/icons/go-down.png</normaloff>:/icons/go-down.png</iconset>
@@ -263,6 +290,9 @@
         <width>31</width>
         <height>31</height>
        </rect>
+      </property>
+      <property name="toolTip">
+       <string>Move selected item up</string>
       </property>
       <property name="icon">
        <iconset resource="icon.qrc">
@@ -300,6 +330,9 @@
         <height>31</height>
        </rect>
       </property>
+      <property name="toolTip">
+       <string>Remove all items</string>
+      </property>
       <property name="icon">
        <iconset resource="icon.qrc">
         <normaloff>:/icons/edit-delete.png</normaloff>:/icons/edit-delete.png</iconset>
@@ -320,6 +353,9 @@
         <height>31</height>
        </rect>
       </property>
+      <property name="toolTip">
+       <string>Remove selected item</string>
+      </property>
       <property name="icon">
        <iconset resource="icon.qrc">
         <normaloff>:/icons/list-remove.png</normaloff>:/icons/list-remove.png</iconset>
@@ -339,6 +375,9 @@
         <width>31</width>
         <height>31</height>
        </rect>
+      </property>
+      <property name="toolTip">
+       <string>Create new item after selected item</string>
       </property>
       <property name="icon">
        <iconset resource="icon.qrc">
@@ -383,6 +422,9 @@
     <addaction name="actionCut"/>
     <addaction name="actionPaste"/>
     <addaction name="actionDuplicate"/>
+    <addaction name="separator"/>
+    <addaction name="actionInsert_before"/>
+    <addaction name="actionCreate_tick_behind"/>
     <addaction name="separator"/>
     <addaction name="actionOptions"/>
    </widget>
@@ -481,6 +523,16 @@
   <action name="actionDuplicate">
    <property name="text">
     <string>&amp;Duplicate</string>
+   </property>
+  </action>
+  <action name="actionInsert_before">
+   <property name="text">
+    <string>Create tick &amp;before</string>
+   </property>
+  </action>
+  <action name="actionCreate_tick_behind">
+   <property name="text">
+    <string>C&amp;reate tick behind</string>
    </property>
   </action>
  </widget>

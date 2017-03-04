@@ -99,22 +99,17 @@ void TimeLine::clear()
 QString TimeLine::getUnusedId()
 {
     uint tempNum = 1;
-    bool found = false;
 
     QList<TimeTick>::const_iterator i;
     for(i=list.constBegin(); i!=list.constEnd(); i++)
     {
-        if (i->id == QString::number(tempNum))
-            tempNum++;
-        else
-        {
-            found = true;
+        if (!existId(QString::number(tempNum)))
             break;
-        }
+        tempNum++;
         if (tempNum == 0xFFFFFFFF)
             break;
     }
-    if (found || tempNum == 1)
+    if (tempNum != 0xFFFFFFFF)
         return QString::number(tempNum);
     else
         return "";
