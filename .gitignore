@@ -1,3 +1,4 @@
+*.bak
 f3-qt
 *.o
 moc*

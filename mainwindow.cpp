@@ -593,19 +593,19 @@ void MainWindow::on_listTimeline_customContextMenuRequested(const QPoint &pos)
     if (menuTimeline == NULL)
     {
         menuTimeline = new QMenu(ui->listTimeline);
-        QAction* action = new QAction("&Cut");
+        QAction* action = new QAction("&Cut", this);
         connect(action, SIGNAL(triggered(bool)),
                 this, SLOT(on_actionCut_triggered()));
         menuTimeline->addAction(action);
-        action = new QAction("&Copy");
+        action = new QAction("&Copy", this);
         connect(action, SIGNAL(triggered(bool)),
                 this, SLOT(on_actionCopy_triggered()));
         menuTimeline->addAction(action);
-        action = new QAction("&Paste");
+        action = new QAction("&Paste", this);
         connect(action, SIGNAL(triggered(bool)),
                 this, SLOT(on_actionPaste_triggered()));
         menuTimeline->addAction(action);
-        action = new QAction("&Duplicate");
+        action = new QAction("&Duplicate", this);
         connect(action, SIGNAL(triggered(bool)),
                 this, SLOT(on_actionDuplicate_triggered()));
         menuTimeline->addAction(action);

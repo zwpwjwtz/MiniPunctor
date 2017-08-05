@@ -399,7 +399,7 @@
      <x>0</x>
      <y>0</y>
      <width>500</width>
-     <height>30</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -478,9 +478,6 @@
   <action name="actionOptions">
    <property name="text">
     <string>&amp;Options</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionAbout">
