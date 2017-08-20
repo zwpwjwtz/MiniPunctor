@@ -16,6 +16,11 @@
     <height>270</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
   <property name="windowIcon">
    <iconset resource="icon.qrc">
     <normaloff>:/icons/MiniPunctor.png</normaloff>:/icons/MiniPunctor.png</iconset>
@@ -92,7 +97,7 @@
      <string>Start / pause timer</string>
     </property>
     <property name="text">
-     <string>Start !</string>
+     <string>Start</string>
     </property>
    </widget>
    <widget class="QPushButton" name="buttonStop">
