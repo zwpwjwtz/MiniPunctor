@@ -394,6 +394,7 @@ void MainWindow::on_actionOpen_File_triggered()
                     "Open file",
                     lastOpeningPath,
                     QString(PUNCTOR_FILE_SUFFIX_ALL).append(";;")
+                    .append(PUNCTOR_FILE_SUFFIX_TXT).append(";;")
                     .append(PUNCTOR_FILE_SUFFIX_LRC).append(";;")
                     .append(PUNCTOR_FILE_SUFFIX_SRT).append(";;")
                     .append(PUNCTOR_FILE_SUFFIX_SMI),
