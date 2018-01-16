@@ -167,6 +167,11 @@ QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
         tempTime.replace(PUNCTOR_TIME_FORMAT_SEC, buf);
         timeStamp %= 1000;
     }
+    if (format.contains(PUNCTOR_TIME_FORMAT_MSECS))
+    {
+        std::sprintf(buf, Punctor_getTimeFieldFormat(timeStamp, 1), timeStamp);
+        tempTime.replace(PUNCTOR_TIME_FORMAT_MSECS, buf);
+    }
     if (format.contains(PUNCTOR_TIME_FORMAT_MSEC))
     {
         std::sprintf(buf, Punctor_getTimeFieldFormat(timeStamp, 3), timeStamp);
@@ -189,6 +194,21 @@ qint64 TimeLine::stringToTimeStamp(QString str, QString format)
     qint64 tempTime = 0;
     int p, fraction;
     bool OK = true, valid = false;
+
+    p = format.indexOf(PUNCTOR_TIME_FORMAT_MSECS);
+    if (p >= 0)
+    {
+        int q = p + 1;
+        while (q < str.length())
+        {
+            if (str[q] < 0x30 || str[q] > 0x39)
+                break;
+            q++;
+        }
+        fraction = str.mid(p, q - p + 1).toInt(&OK);
+        tempTime += fraction;
+        valid = true;
+    }
 
     p = format.indexOf(PUNCTOR_TIME_FORMAT_MSEC);
     if (p >= 0)

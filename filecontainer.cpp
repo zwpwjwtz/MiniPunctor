@@ -1,4 +1,5 @@
 #include "filecontainer.h"
+#include "file_format.h"
 
 #define PUNCTOR_FILE_BOM_UTF8 "\xEF\xBB\xBF"
 #define PUNCTOR_FILE_BOM_UTF16BE "\xFE\xFF"
@@ -8,10 +9,10 @@
 
 FileContainer::FileContainer()
 {
-    varPlaceHolder[0] = PUNCTOR_FILE_FORMAT_VAR_ID;
-    varPlaceHolder[1] = PUNCTOR_FILE_FORMAT_VAR_TIME1;
-    varPlaceHolder[2] = PUNCTOR_FILE_FORMAT_VAR_TIME2;
-    varPlaceHolder[3] = PUNCTOR_FILE_FORMAT_VAR_CONTENT;
+    varPlaceHolder[0] = PUNCTOR_FILE_REC_VAR_ID;
+    varPlaceHolder[1] = PUNCTOR_FILE_REC_VAR_TIME1;
+    varPlaceHolder[2] = PUNCTOR_FILE_REC_VAR_TIME2;
+    varPlaceHolder[3] = PUNCTOR_FILE_REC_VAR_CONTENT;
 
     setFileType(PlainText);
 }
@@ -27,19 +28,50 @@ FileContainer::FileErrorNumber FileContainer::open(QString path,
     TimeTick tick;
     setFileType(guessFileType(path));
 
-    header = file.read(seekFirstRecord(file));
-    recordList.clear();
-    while(!file.atEnd())
+    if (bodyBegin.isEmpty())
+        header = file.read(seekFirstRecord(file));
+    else
     {
-        tick = recordToTimeTick(readUntil(file, recordSeperator));
-        if (tick.startTime < 0 && !forceOpen)
+        header = readUntil(file, bodyBegin);
+        readUntil(file, recordSeparator);
+    }
+    footer.clear();
+
+    qint64 p = 0;
+    bool reachBodyEnd = false;
+    recordList.clear();
+    while(!(file.atEnd() || reachBodyEnd))
+    {
+        p = file.pos();
+        tick = recordToTimeTick(readUntil(file, recordSeparator));
+        if (file.atEnd() && !bodyEnd.isEmpty())
         {
-            file.close();
-            return recordError;
+            // Go back to the previous position,
+            // and retry with another separator (BODYEND)
+            file.seek(p);
+            tick = recordToTimeTick(readUntil(file, bodyEnd));
+            footer.append(bodyEnd);
+            reachBodyEnd = true;
+        }
+
+        if (tick.startTime < 0)
+        {
+            if (tick.content.trimmed().isEmpty())
+            {
+                // Skip empty record
+                continue;
+            }
+            else if (!forceOpen)
+            {
+                // Stop pharsing
+                file.close();
+                return recordError;
+            }
         }
         recordList.appendItem(tick);
-    }    
-    footer = readUntil(file, "");
+    }
+
+    footer.append(file.readAll());
 
     file.close();
     filePath = path;
@@ -60,20 +92,33 @@ FileContainer::FileErrorNumber FileContainer::save(TimeLine &recordList)
     for (int i=0; i<count; i++)
     {
         tempRecord = recordFormat;
-        tempRecord.replace(PUNCTOR_FILE_FORMAT_VAR_ID, recordList[i].id);
+        tempRecord.replace(PUNCTOR_FILE_REC_VAR_ID, recordList[i].id);
         tempTime = TimeLine::timeStampToString(recordList[i].startTime,
                                                timeFormat);
-        tempRecord.replace(PUNCTOR_FILE_FORMAT_VAR_TIME1, tempTime);
-        if (tempRecord.contains(PUNCTOR_FILE_FORMAT_VAR_TIME2))
+        tempRecord.replace(PUNCTOR_FILE_REC_VAR_TIME1, tempTime);
+        if (tempRecord.contains(PUNCTOR_FILE_REC_VAR_TIME2))
         {
             tempTime = TimeLine::timeStampToString(recordList[i].endTime,
                                                    timeFormat);
-            tempRecord.replace(PUNCTOR_FILE_FORMAT_VAR_TIME2, tempTime);
+            tempRecord.replace(PUNCTOR_FILE_REC_VAR_TIME2, tempTime);
         }
-        tempRecord.replace(PUNCTOR_FILE_FORMAT_VAR_CONTENT,
+        tempRecord.replace(PUNCTOR_FILE_REC_VAR_CONTENT,
                            recordList[i].content);
 
-        file.write(tempRecord.append(recordSeperator).toLocal8Bit());
+        switch (recSepPos)
+        {
+            case PUNCTOR_FILE_REC_SEP_BEFORE:
+                tempRecord.prepend(recordSeparator);
+                break;
+            case PUNCTOR_FILE_REC_SEP_AFTER:
+                tempRecord.append(recordSeparator);
+                break;
+            default:
+                if (i < count - 1)
+                    tempRecord.append(recordSeparator);
+        }
+
+        file.write(tempRecord.toLocal8Bit());
     }
     file.write(footer);
 
@@ -117,26 +162,40 @@ FileContainer::FileType FileContainer::getFileType()
 
 void FileContainer::setFileType(FileType file_type)
 {
+    bodyBegin.clear();
+    bodyEnd.clear();
+
     switch(file_type)
     {
         case LRC:
             recordFormat = PUNCTOR_FILE_FORMAT_LRC_RECORD;
             timeFormat = PUNCTOR_FILE_FORMAT_LRC_TIME;
-            recordSeperator = PUNCTOR_FILE_FORMAT_LRC_SEP;
+            recordSeparator = PUNCTOR_FILE_FORMAT_LRC_SEP;
+            recSepPos = PUNCTOR_FILE_FORMAT_LRC_SEPPOS;
             break;
         case SRT:
             recordFormat = PUNCTOR_FILE_FORMAT_SRT_RECORD;
             timeFormat = PUNCTOR_FILE_FORMAT_SRT_TIME;
-            recordSeperator = PUNCTOR_FILE_FORMAT_SRT_SEP;
+            recordSeparator = PUNCTOR_FILE_FORMAT_SRT_SEP;
+            recSepPos = PUNCTOR_FILE_FORMAT_SRT_SEPPOS;
+            break;
+        case SMI:
+            bodyBegin = PUNCTOR_FILE_FORMAT_SMI_BODYBEGIN;
+            bodyEnd = PUNCTOR_FILE_FORMAT_SMI_BODYEND;
+            recSepPos = PUNCTOR_FILE_FORMAT_SMI_SEPPOS;
+            recordFormat = PUNCTOR_FILE_FORMAT_SMI_RECORD;
+            timeFormat = PUNCTOR_FILE_FORMAT_SMI_TIME;
+            recordSeparator = PUNCTOR_FILE_FORMAT_SMI_SEP;
             break;
         case PlainText:
         default:
+            recSepPos = PUNCTOR_FILE_FORMAT_PLAIN_SEPPOS;
             recordFormat = PUNCTOR_FILE_FORMAT_PLAIN_RECORD;
             timeFormat = PUNCTOR_FILE_FORMAT_PLAIN_TIME;
-            recordSeperator = PUNCTOR_FILE_FORMAT_PLAIN_SEP;
+            recordSeparator = PUNCTOR_FILE_FORMAT_PLAIN_SEP;
     }
 
-    int varPos[PUNCTOR_FILE_FORMAT_MAX_VAR];
+    int varPos[PUNCTOR_FILE_REC_MAX_VAR];
     int p = 0;
     int i = 0, j, varIndex;
     while (p < recordFormat.length())
@@ -180,7 +239,7 @@ TimeTick FileContainer::recordToTimeTick(QString str)
         if (varSeperator[i + 1].isEmpty())
             p2 = str.length();
         else
-            p2 = str.indexOf(varSeperator[i + 1], p1);
+            p2 = str.indexOf(varSeperator[i + 1], p1, Qt::CaseInsensitive);
         tempVar = str.mid(p1, p2 - p1);
 
         switch (varOrder[i])
@@ -219,7 +278,7 @@ QByteArray FileContainer::readUntil(QFile& file, const QString& splitter)
     while (!file.atEnd())
     {
         buffer = file.read(PUNCTOR_FILE_PROBE_BLOCK_LEN);
-        p = buffer.indexOf(splitter);
+        p = buffer.indexOf(splitter, Qt::CaseInsensitive);
         if (p >= 0)
         {
             file.seek(file.pos() - buffer.length() + p + paddingLength + 1);
@@ -248,11 +307,11 @@ qint64 FileContainer::seekFirstRecord(QFile& file)
     QString firstTimeVar;
     bool hasTimeVar = false;
 
-    for (i=0; i<PUNCTOR_FILE_FORMAT_MAX_VAR; i++)
+    for (i=0; i<PUNCTOR_FILE_REC_MAX_VAR; i++)
     {
         firstTimeVar = varPlaceHolder[varOrder[i]];
-        if (firstTimeVar == PUNCTOR_FILE_FORMAT_VAR_TIME1 ||
-            firstTimeVar == PUNCTOR_FILE_FORMAT_VAR_TIME2)
+        if (firstTimeVar == PUNCTOR_FILE_REC_VAR_TIME1 ||
+            firstTimeVar == PUNCTOR_FILE_REC_VAR_TIME2)
         {
             hasTimeVar = true;
             paddingLength = firstTimeVar.length() - 1;
@@ -331,6 +390,8 @@ FileContainer::FileType FileContainer::guessFileType(QString filePath)
         tempType = LRC;
     else if (suffix == "srt")
         tempType = SRT;
+    else if (suffix == "smi")
+        tempType = SMI;
     else
         tempType = PlainText;
     return tempType;

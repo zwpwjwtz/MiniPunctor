@@ -10,10 +10,11 @@
 #define PUNCTOR_DISPLAY_TITLE_MAIN "Mini Punctor"
 #define PUNCTOR_DISPLAY_TIME_FORMAT "mm : ss . zzz"
 
+#define PUNCTOR_FILE_SUFFIX_ALL "All (*.*)(*.*)"
 #define PUNCTOR_FILE_SUFFIX_TXT "Plain Text (*.txt)(*.txt)"
 #define PUNCTOR_FILE_SUFFIX_LRC "Lyric file (*.lrc)(*.lrc)"
 #define PUNCTOR_FILE_SUFFIX_SRT "Subtitle file (*.srt)(*.srt)"
-
+#define PUNCTOR_FILE_SUFFIX_SMI "Windows Media Player Subtitle (*.smi)(*.smi)"
 
 bool Punctor_getSelectedItemIndex(QListWidget* list,
                                   QList<int>& indexList);
@@ -65,13 +66,16 @@ void MainWindow::showTime(qint64 timeTick)
 QString& MainWindow::tickToItemText(const TimeTick &tick)
 {
     static QString content;
+    static QString tickContent;
     content = TimeLine::timeStampToString(tick.startTime,
                                           currentFile.getTimeFormat());
-    content.append("  ").append(tick.content);
-    content.replace("\r\n", "↵");
-    content.replace('\n', "↵");
-    content.replace('\r', "↵");
-    return content;
+    tickContent = tick.content;
+    tickContent.replace("\r\n", "\n")
+               .replace('\n', "↵")
+               .replace('\r', " ")
+               .replace("<br>", "↵")
+               .replace("&nbsp;", " ");
+    return content.append("  ").append(tickContent);
 }
 
 void MainWindow::updateTitle(QString fileName)
@@ -338,7 +342,8 @@ void MainWindow::on_actionSave_File_As_triggered()
                     lastSavingPath,
                     QString(PUNCTOR_FILE_SUFFIX_TXT).append(";;")
                     .append(PUNCTOR_FILE_SUFFIX_LRC).append(";;")
-                    .append(PUNCTOR_FILE_SUFFIX_SRT),
+                    .append(PUNCTOR_FILE_SUFFIX_SRT).append(";;")
+                    .append(PUNCTOR_FILE_SUFFIX_SMI),
                     &lastSavingFilter);
     if (path.isEmpty())
         return;
@@ -388,9 +393,10 @@ void MainWindow::on_actionOpen_File_triggered()
                     this,
                     "Open file",
                     lastOpeningPath,
-                    QString(PUNCTOR_FILE_SUFFIX_TXT).append(";;")
+                    QString(PUNCTOR_FILE_SUFFIX_ALL).append(";;")
                     .append(PUNCTOR_FILE_SUFFIX_LRC).append(";;")
-                    .append(PUNCTOR_FILE_SUFFIX_SRT),
+                    .append(PUNCTOR_FILE_SUFFIX_SRT).append(";;")
+                    .append(PUNCTOR_FILE_SUFFIX_SMI),
                     &lastOpeningFilter);
     if (path.isEmpty())
         return;
