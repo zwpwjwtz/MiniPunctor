@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->bUDMsec->setText("Msec");
     help = NULL;
     tickEditor = NULL;
+    search = NULL;
     menuTimeline = NULL;
 
     connect(&timer,
@@ -183,11 +184,20 @@ void MainWindow::closeEvent(QCloseEvent* event)
     if (sureToExit(false))
     {
         if (help)
+        {
             help->close();
-        delete help;
+            delete help;
+        }
         if (tickEditor)
+        {
             tickEditor->close();
-        delete tickEditor;
+            delete tickEditor;
+        }
+        if (search)
+        {
+            search->close();
+            delete search;
+        }
         if (menuTimeline)
             delete menuTimeline;
     }
@@ -716,6 +726,84 @@ void MainWindow::on_actionCreate_tick_behind_triggered()
                                                  currentFile.getTimeFormat()));
     currentList.addItem(tick, indexList.last() + 1);
     fileModified = true;
+}
+
+void MainWindow::on_actionSelect_all_triggered()
+{
+    ui->listTimeline->selectAll();
+}
+
+void MainWindow::on_actionReverse_selection_triggered()
+{
+    for (int i=0; i<ui->listTimeline->count(); i++)
+        ui->listTimeline->item(i)->setSelected(
+                    !ui->listTimeline->item(i)->isSelected());
+}
+
+void MainWindow::on_actionDelete_triggered()
+{
+    on_buttonListRemove_clicked();
+}
+void MainWindow::on_actionFind_Replace_triggered()
+{
+    if (!search)
+        search = new SearchWindow(this);
+    search->show();
+}
+
+void MainWindow::on_timeline_search(QString searched, int &lastIndex)
+{
+    if (lastIndex < 0)
+        lastIndex = 0;
+    else
+        lastIndex++;
+
+    int i;
+    for (i=lastIndex; i<currentList.count(); i++)
+        if (currentList[i].content.indexOf(searched) >= 0)
+            break;
+
+    if (i < currentList.count())
+    {
+        ui->listTimeline->clearSelection();
+        ui->listTimeline->item(i)->setSelected(true);
+        ui->listTimeline->scrollToItem(ui->listTimeline->item(i));
+        lastIndex = i;
+    }
+    else
+        lastIndex = -1;
+}
+
+void MainWindow::on_timeline_replace(QString searched,
+                                     QString newContent,
+                                     int& lastIndex)
+{
+    on_timeline_search(searched, lastIndex);
+    TimeTick tick = currentList[lastIndex];
+    tick.content.replace(searched, newContent);
+    currentList.updateItem(tick, lastIndex);
+    updateListItem(lastIndex);
+}
+
+void MainWindow::on_timeline_replace_all(QString searched,
+                                         QString newContent,
+                                         int& lastIndex,
+                                         int& replaceCount)
+{
+    int i = lastIndex, count = 0;
+    while(true)
+    {
+        on_timeline_search(searched, i);
+        if (i == -1)
+            break;
+        TimeTick tick = currentList[i];
+        tick.content.replace(searched, newContent);
+        currentList.updateItem(tick, i);
+        count++;
+    }
+    updateList();
+    lastIndex = i;
+    replaceCount = count;
 }
 
 bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)

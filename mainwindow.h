@@ -6,7 +6,7 @@
 #include "helpwindow.h"
 #include "tickeditwindow.h"
 #include "filecontainer.h"
-
+#include "searchwindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,8 +18,17 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    ~MainWindow();    
 
+public slots:
+    void on_timeline_search(QString searched, int& lastIndex);
+    void on_timeline_replace(QString searched,
+                             QString newContent,
+                             int& lastIndex);
+    void on_timeline_replace_all(QString searched,
+                                 QString newContent,
+                                 int& lastIndex,
+                                 int& replaceCount);
 private slots:
     void on_timer_timeout();
 
@@ -53,11 +62,16 @@ private slots:
     void on_actionDuplicate_triggered();
     void on_actionInsert_before_triggered();
     void on_actionCreate_tick_behind_triggered();    
+    void on_actionSelect_all_triggered();
+    void on_actionReverse_selection_triggered();
+    void on_actionDelete_triggered();
+    void on_actionFind_Replace_triggered();
 
 private:
     Ui::MainWindow *ui;
     HelpWindow* help;
     TickEditWindow* tickEditor;
+    SearchWindow* search;
     QMenu* menuTimeline;
     QTimer timer;
     FileContainer currentFile;
@@ -73,7 +87,6 @@ private:
     bool isPuncturing;
     bool isCutting;
     bool fileModified;
-
 
     void showTime(qint64 timeTick);
     QString& tickToItemText(const TimeTick &tick);

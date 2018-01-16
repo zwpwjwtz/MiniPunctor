@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     buttonupdown.cpp \
     filecontainer.cpp \
     timeline.cpp \
-    tickeditwindow.cpp
+    tickeditwindow.cpp \
+    searchwindow.cpp
 
 HEADERS  += mainwindow.h \
     helpwindow.h \
@@ -43,12 +44,14 @@ HEADERS  += mainwindow.h \
     filecontainer.h \
     timeline.h \
     file_format.h \
-    tickeditwindow.h
+    tickeditwindow.h \
+    searchwindow.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \
     buttonupdown.ui \
-    tickeditwindow.ui
+    tickeditwindow.ui \
+    searchwindow.ui
 
 RESOURCES += \
     icon.qrc
