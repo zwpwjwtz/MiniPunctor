@@ -321,7 +321,7 @@ qint64 FileContainer::seekFirstRecord(QFile& file)
 
     oldPos = file.pos();
     file.seek(0);
-    while (!file.atEnd())
+    while (true)
     {
         buffer = file.read(PUNCTOR_FILE_PROBE_BLOCK_LEN);
         if (hasTimeVar && i == 0)
@@ -329,6 +329,11 @@ qint64 FileContainer::seekFirstRecord(QFile& file)
             p = seekTimeString(buffer, timeFormat);
             if (p < 0)
             {
+                if (file.atEnd())
+                {
+                    p = file.size();
+                    break;
+                }
                 file.seek(file.pos() - paddingLength);
                 continue;
             }
