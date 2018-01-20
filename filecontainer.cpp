@@ -131,14 +131,27 @@ FileContainer::FileErrorNumber FileContainer::saveAs(TimeLine &recordList,
 {
     QString oldPath = filePath;
     FileType oldType = _fileType;
+    QByteArray oldHeader = header;
+    QByteArray oldFooter = footer;
     filePath = path;
+
     setFileType(guessFileType(path));
+    if (_fileType != oldType)
+    {
+        header.clear();
+        footer.clear();
+    }
+
     FileErrorNumber err = save(recordList);
     if (err != fileOK)
     {
         filePath = oldPath;
         if (_fileType != oldType)
+        {
             setFileType(oldType);
+            header = oldHeader;
+            footer = oldFooter;
+        }
         return err;
     }
     else
