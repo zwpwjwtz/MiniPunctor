@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->bUDMsec->setText("Msec");
     help = NULL;
     tickEditor = NULL;
+    tickShifter = NULL;
     search = NULL;
     menuTimeline = NULL;
 
@@ -179,6 +180,51 @@ bool MainWindow::sureToExit(bool manualClose)
     return true;
 }
 
+int MainWindow::searchText(const QString& str, int lastIndex)
+{
+    if (lastIndex < 0)
+        lastIndex = 0;
+
+    while (++lastIndex < currentList.count())
+    {
+        if (currentList[lastIndex].content.indexOf(str) >= 0)
+            break;
+    }
+
+    if (lastIndex < currentList.count())
+    {
+        ui->listTimeline->clearSelection();
+        ui->listTimeline->item(lastIndex)->setSelected(true);
+        ui->listTimeline->scrollToItem(ui->listTimeline->item(lastIndex));
+        return lastIndex;
+    }
+    else
+        return -1;
+}
+
+void MainWindow::shiftSelectedTicks(qint64 value)
+{
+    QList<int> indexList;
+    if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
+    {
+        QMessageBox::information(this, "No time tick selected",
+                                 "Please select one time tick from the list "
+                                 "before editing it.");
+        return;
+    }
+
+    TimeTick tick;
+    QList<int>::const_iterator i;
+    for(i=indexList.constBegin(); i!=indexList.constEnd(); i++)
+    {
+        tick = currentList[*i];
+        tick.startTime += value;
+        tick.endTime += value;
+        currentList.updateItem(tick, *i);
+    }
+    updateList();
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     if (sureToExit(false))
@@ -192,6 +238,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
         {
             tickEditor->close();
             delete tickEditor;
+        }
+        if (tickShifter)
+        {
+            tickShifter->close();
+            delete tickShifter;
         }
         if (search)
         {
@@ -610,21 +661,36 @@ void MainWindow::on_listTimeline_customContextMenuRequested(const QPoint &pos)
     if (menuTimeline == NULL)
     {
         menuTimeline = new QMenu(ui->listTimeline);
+
         QAction* action = new QAction("&Cut", this);
         connect(action, SIGNAL(triggered(bool)),
                 this, SLOT(on_actionCut_triggered()));
-        menuTimeline->addAction(action);
+        menuTimeline->addAction(action);        
         action = new QAction("&Copy", this);
         connect(action, SIGNAL(triggered(bool)),
                 this, SLOT(on_actionCopy_triggered()));
-        menuTimeline->addAction(action);
+        menuTimeline->addAction(action);        
         action = new QAction("&Paste", this);
         connect(action, SIGNAL(triggered(bool)),
                 this, SLOT(on_actionPaste_triggered()));
-        menuTimeline->addAction(action);
-        action = new QAction("&Duplicate", this);
+        menuTimeline->addAction(action);        
+
+        menuTimeline->addSeparator();
+
+        action = new QAction("Insert &before", this);
         connect(action, SIGNAL(triggered(bool)),
-                this, SLOT(on_actionDuplicate_triggered()));
+                this, SLOT(on_actionInsert_before_triggered()));
+        menuTimeline->addAction(action);
+        action = new QAction("Insert &after", this);
+        connect(action, SIGNAL(triggered(bool)),
+                this, SLOT(on_actionCreate_tick_behind_triggered()));
+        menuTimeline->addAction(action);
+
+        menuTimeline->addSeparator();
+
+        action = new QAction("&Adjust selected", this);
+        connect(action, SIGNAL(triggered(bool)),
+                this, SLOT(on_actionAdjust_selected_triggered()));
         menuTimeline->addAction(action);
     }
     menuTimeline->exec(QCursor::pos());
@@ -751,27 +817,63 @@ void MainWindow::on_actionFind_Replace_triggered()
     search->show();
 }
 
+void MainWindow::on_actionSort_by_start_time_triggered()
+{
+    currentList.sort(PUNCTOR_TIME_FIELD_START);
+    updateList();
+}
+
+void MainWindow::on_actionSort_by_end_time_triggered()
+{
+    currentList.sort(PUNCTOR_TIME_FIELD_END);
+    updateList();
+}
+
+void MainWindow::on_actionSort_by_tick_ID_triggered()
+{
+    currentList.sort(PUNCTOR_TIME_FIELD_ID);
+    updateList();
+}
+
+void MainWindow::on_actionAdjust_selected_triggered()
+{
+    if (!tickShifter)
+        tickShifter = new TickShiftWindow(this);
+    tickShifter->exec();
+    if (tickShifter->accepted)
+        shiftSelectedTicks(tickShifter->shiftValue);
+}
+
+void MainWindow::on_actionAdjust_all_ticks_triggered()
+{
+    if (!tickShifter)
+        tickShifter = new TickShiftWindow(this);
+    tickShifter->exec();
+    if (tickShifter->accepted && ui->listTimeline->count() > 0)
+    {
+        ui->listTimeline->selectAll();
+        shiftSelectedTicks(tickShifter->shiftValue);
+    }
+}
+
+void MainWindow::on_actionMove_up_triggered()
+{
+    on_buttonListMoveUp_clicked();
+}
+
+void MainWindow::on_actionMove_down_triggered()
+{
+    on_buttonListMoveDown_clicked();
+}
+
 void MainWindow::on_timeline_search(QString searched, int &lastIndex)
 {
-    if (lastIndex < 0)
-        lastIndex = 0;
-    else
-        lastIndex++;
+    lastIndex = searchText(searched, lastIndex);
 
-    int i;
-    for (i=lastIndex; i<currentList.count(); i++)
-        if (currentList[i].content.indexOf(searched) >= 0)
-            break;
-
-    if (i < currentList.count())
-    {
-        ui->listTimeline->clearSelection();
-        ui->listTimeline->item(i)->setSelected(true);
-        ui->listTimeline->scrollToItem(ui->listTimeline->item(i));
-        lastIndex = i;
-    }
-    else
-        lastIndex = -1;
+    if (lastIndex == -1)
+        QMessageBox::information(this,
+                                 "Not found",
+                                 "Searching finished. No matched found.");
 }
 
 void MainWindow::on_timeline_replace(QString searched,
@@ -779,6 +881,8 @@ void MainWindow::on_timeline_replace(QString searched,
                                      int& lastIndex)
 {
     on_timeline_search(searched, lastIndex);
+    if (lastIndex < 0) return;
+
     TimeTick tick = currentList[lastIndex];
     tick.content.replace(searched, newContent);
     currentList.updateItem(tick, lastIndex);
@@ -787,13 +891,12 @@ void MainWindow::on_timeline_replace(QString searched,
 
 void MainWindow::on_timeline_replace_all(QString searched,
                                          QString newContent,
-                                         int& lastIndex,
-                                         int& replaceCount)
+                                         int& lastIndex)
 {
     int i = lastIndex, count = 0;
     while(true)
     {
-        on_timeline_search(searched, i);
+        i = searchText(searched, i);
         if (i == -1)
             break;
         TimeTick tick = currentList[i];
@@ -803,7 +906,12 @@ void MainWindow::on_timeline_replace_all(QString searched,
     }
     updateList();
     lastIndex = i;
-    replaceCount = count;
+    QMessageBox::information(this,
+                             "Replace All",
+                             QString().sprintf("Finish replacing. "
+                                              "%d items replaced.",
+                                              count),
+                             QMessageBox::Ok);
 }
 
 bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)

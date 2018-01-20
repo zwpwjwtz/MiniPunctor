@@ -21,9 +21,9 @@ SearchWindow::SearchWindow(QWidget *parent) :
             parent,
             SLOT(on_timeline_replace(QString, QString, int&)));
     connect(this,
-            SIGNAL(replaceTimelineAll(QString, QString, int&, int&)),
+            SIGNAL(replaceTimelineAll(QString, QString, int&)),
             parent,
-            SLOT(on_timeline_replace_all(QString, QString, int&, int&)));
+            SLOT(on_timeline_replace_all(QString, QString, int&)));
 }
 
 SearchWindow::~SearchWindow()
@@ -63,7 +63,7 @@ void SearchWindow::on_buttonExit_clicked()
 
 void SearchWindow::on_buttonFind_clicked()
 {
-    if (checkInput(false))
+    if (!checkInput(false))
         return;
 
     emit searchTimeline(ui->textFind->toPlainText(), lastSearched);
@@ -84,15 +84,7 @@ void SearchWindow::on_buttonReplaceAll_clicked()
     if (!(ui->checkBox->isChecked() && checkInput(true)))
         return;
 
-    int replaceCount = 0;
     emit replaceTimelineAll(ui->textFind->toPlainText(),
                             ui->textReplace->toPlainText(),
-                            lastSearched,
-                            replaceCount);
-    QMessageBox::information(this,
-                             "Replace All",
-                             QString().sprintf("Finish replacing. "
-                                              "%d items replaced.",
-                                              replaceCount),
-                             QMessageBox::Ok);
+                            lastSearched);
 }

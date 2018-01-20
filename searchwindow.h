@@ -22,8 +22,7 @@ signals:
                          int& lastIndex);
     void replaceTimelineAll(QString searched,
                             QString newContent,
-                            int& lastIndex,
-                            int& replaceCount);
+                            int& lastIndex);
 
 private slots:
     void on_checkBox_clicked();

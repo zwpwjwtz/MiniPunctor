@@ -115,6 +115,45 @@ QString TimeLine::getUnusedId()
         return "";
 }
 
+void TimeLine::sort(int field)
+{
+    if (!(field == PUNCTOR_TIME_FIELD_START ||
+          field == PUNCTOR_TIME_FIELD_END ||
+          field == PUNCTOR_TIME_FIELD_ID))
+        return;
+
+    // Insertion sort
+    int i, j, k;
+    bool ok1, ok2;
+    for (i=0; i<list.count(); i++)
+    {
+        k = i;
+        for (j=i+1; j<list.count(); j++)
+        {
+            switch (field)
+            {
+                case PUNCTOR_TIME_FIELD_START:
+                    if (list[j].startTime < list[k].startTime)
+                        k = j;
+                    break;
+                case PUNCTOR_TIME_FIELD_END:
+                    if (list[j].endTime < list[k].endTime)
+                        k = j;
+                    break;
+                case PUNCTOR_TIME_FIELD_ID:
+                    if (list[j].id.toInt(&ok1) < list[k].id.toInt(&ok2) &&
+                        ok1 && ok2)
+                        k = j;
+                    else if (!(ok1 && ok2) && list[j].id < list[k].id)
+                        k = j;
+                    break;
+            }
+        }
+        if (k != i)
+            list.swap(i, k);
+    }
+}
+
 const char* Punctor_getTimeFieldFormat(int value, int minLength)
 {
     if (value < 10 && minLength < 2)

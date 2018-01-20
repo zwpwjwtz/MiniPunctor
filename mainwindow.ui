@@ -445,8 +445,24 @@
     </property>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuTimeline">
+    <property name="title">
+     <string>Timeline</string>
+    </property>
+    <addaction name="actionMove_up"/>
+    <addaction name="actionMove_down"/>
+    <addaction name="separator"/>
+    <addaction name="actionSort_by_start_time"/>
+    <addaction name="actionSort_by_end_time"/>
+    <addaction name="actionSort_by_tick_ID"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdjust_selected"/>
+    <addaction name="actionAdjust_all_ticks"/>
+    <addaction name="separator"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuTimeline"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionNew_File">
@@ -567,6 +583,58 @@
   <action name="actionDelete">
    <property name="text">
     <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionSort_by_start_time">
+   <property name="text">
+    <string>Sort by s&amp;tart time</string>
+   </property>
+  </action>
+  <action name="actionSort_by_end_time">
+   <property name="text">
+    <string>Sort by &amp;end time</string>
+   </property>
+  </action>
+  <action name="actionSort_by_tick_ID">
+   <property name="text">
+    <string>Sort by tick &amp;ID</string>
+   </property>
+  </action>
+  <action name="actionAdjust_selected">
+   <property name="text">
+    <string>Adjust &amp;selected ticks</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+E</string>
+   </property>
+  </action>
+  <action name="actionAdjust_all_ticks">
+   <property name="text">
+    <string>Adjust &amp;all ticks</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionMove_up">
+   <property name="text">
+    <string>Move &amp;up</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Up</string>
+   </property>
+  </action>
+  <action name="actionMove_down">
+   <property name="text">
+    <string>Move &amp;down</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Down</string>
+   </property>
+  </action>
+  <action name="actionClear_all_ticks">
+   <property name="text">
+    <string>Clear all ticks</string>
    </property>
   </action>
  </widget>

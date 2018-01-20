@@ -5,6 +5,7 @@
 #include <QTimer>
 #include "helpwindow.h"
 #include "tickeditwindow.h"
+#include "tickshiftwindow.h"
 #include "filecontainer.h"
 #include "searchwindow.h"
 
@@ -27,8 +28,7 @@ public slots:
                              int& lastIndex);
     void on_timeline_replace_all(QString searched,
                                  QString newContent,
-                                 int& lastIndex,
-                                 int& replaceCount);
+                                 int& lastIndex);
 private slots:
     void on_timer_timeout();
 
@@ -66,11 +66,19 @@ private slots:
     void on_actionReverse_selection_triggered();
     void on_actionDelete_triggered();
     void on_actionFind_Replace_triggered();
+    void on_actionSort_by_start_time_triggered();
+    void on_actionSort_by_end_time_triggered();
+    void on_actionSort_by_tick_ID_triggered();
+    void on_actionAdjust_selected_triggered();
+    void on_actionAdjust_all_ticks_triggered();
+    void on_actionMove_up_triggered();
+    void on_actionMove_down_triggered();
 
 private:
     Ui::MainWindow *ui;
     HelpWindow* help;
     TickEditWindow* tickEditor;
+    TickShiftWindow* tickShifter;
     SearchWindow* search;
     QMenu* menuTimeline;
     QTimer timer;
@@ -95,6 +103,8 @@ private:
     void updateListItem(int index);
     void moveSelectedArea(int delta);
     bool sureToExit(bool manualClose);
+    int searchText(const QString &str, int lastIndex);
+    void shiftSelectedTicks(qint64 value);
 
 protected:
     void closeEvent(QCloseEvent* event);

@@ -4,6 +4,11 @@
 #include <QString>
 #include <QList>
 
+#define PUNCTOR_TIME_FIELD_START 1
+#define PUNCTOR_TIME_FIELD_END 2
+#define PUNCTOR_TIME_FIELD_ID 3
+#define PUNCTOR_TIME_FIELD_CONTENT 4
+
 #define PUNCTOR_TIME_FORMAT_MSEC "zzz"
 #define PUNCTOR_TIME_FORMAT_CSEC "zz"
 #define PUNCTOR_TIME_FORMAT_MSECS "Z"
@@ -35,6 +40,7 @@ public:
     void removeItem(int index);
     void updateItem(TimeTick& tick, int index);
     void swapItem(int index1, int index2);
+    void sort(int field);
     void clear();
     bool existId(QString id);
     QString getUnusedId();
