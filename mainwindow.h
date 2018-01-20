@@ -43,7 +43,6 @@ private slots:
     void on_buttonListMoveUp_clicked();
     void on_buttonListMoveDown_clicked();
     void on_buttonListEdit_clicked();
-    void on_buttonListClear_clicked();
     void on_buttonListRemove_clicked();
     void on_buttonListInsert_clicked();
 

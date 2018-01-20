@@ -223,6 +223,7 @@ void MainWindow::shiftSelectedTicks(qint64 value)
         tick.endTime += value;
         currentList.updateItem(tick, *i);
     }
+    fileModified = true;
     updateList();
 }
 
@@ -259,7 +260,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
-    if (event->key() == Qt::Key_Space)
+    if (event->key() == Qt::Key_Space &&
+        event->modifiers() == Qt::KeyboardModifier::NoModifier)
         on_buttonPunc_clicked();
 }
 
@@ -362,11 +364,6 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionExit_triggered()
 {
-    if (isPuncturing)
-    {
-        if (!sureToExit(true))
-            return;
-    }
     this->close();
 }
 
@@ -525,20 +522,7 @@ void MainWindow::on_actionNew_File_triggered()
     lastSelectedIndex = 0;
 
     ui->listTimeline->clear();
-}
-
-void MainWindow::on_buttonListClear_clicked()
-{
-    if (currentList.count() < 1)
-        return;
-    if (QMessageBox::question(this,"Clear all entries",
-                              "Do you really want to clear the list?\n",
-                              QMessageBox::Yes | QMessageBox::No,
-                              QMessageBox::No) != QMessageBox::Yes)
-            return;
-    ui->listTimeline->clear();
-    currentList.clear();
-    fileModified = true;
+    updateTitle("");
 }
 
 void MainWindow::on_buttonListRemove_clicked()
@@ -546,6 +530,16 @@ void MainWindow::on_buttonListRemove_clicked()
     QList<int> indexList;
     if (!Punctor_getSelectedItemIndex(ui->listTimeline, indexList))
         return;
+    if (indexList.count() > 1)
+    {
+        if (QMessageBox::question(this, "Remove entries",
+                                  QString().sprintf("Do you really want to "
+                                                    "remove %d entries?\n",
+                                                    indexList.count()),
+                                  QMessageBox::Yes | QMessageBox::No,
+                                  QMessageBox::No) != QMessageBox::Yes)
+                    return;
+    }
 
     QList<QListWidgetItem *> itemList(ui->listTimeline->selectedItems());
     QList<QListWidgetItem *>::const_iterator i;
@@ -803,6 +797,8 @@ void MainWindow::on_actionReverse_selection_triggered()
 
 void MainWindow::on_actionDelete_triggered()
 {
+    if (!ui->listTimeline->hasFocus())
+        return;
     on_buttonListRemove_clicked();
 }
 void MainWindow::on_actionFind_Replace_triggered()
@@ -815,18 +811,22 @@ void MainWindow::on_actionFind_Replace_triggered()
 void MainWindow::on_actionSort_by_start_time_triggered()
 {
     currentList.sort(PUNCTOR_TIME_FIELD_START);
+    fileModified = true;
     updateList();
 }
 
 void MainWindow::on_actionSort_by_end_time_triggered()
 {
     currentList.sort(PUNCTOR_TIME_FIELD_END);
+    fileModified = true;
     updateList();
+
 }
 
 void MainWindow::on_actionSort_by_tick_ID_triggered()
 {
     currentList.sort(PUNCTOR_TIME_FIELD_ID);
+    fileModified = true;
     updateList();
 }
 
@@ -836,7 +836,10 @@ void MainWindow::on_actionAdjust_selected_triggered()
         tickShifter = new TickShiftWindow(this);
     tickShifter->exec();
     if (tickShifter->accepted)
+    {
         shiftSelectedTicks(tickShifter->shiftValue);
+        fileModified = true;
+    }
 }
 
 void MainWindow::on_actionAdjust_all_ticks_triggered()
@@ -848,6 +851,7 @@ void MainWindow::on_actionAdjust_all_ticks_triggered()
     {
         ui->listTimeline->selectAll();
         shiftSelectedTicks(tickShifter->shiftValue);
+        fileModified = true;
     }
 }
 
@@ -881,6 +885,8 @@ void MainWindow::onTimelineReplace(QString searched,
     TimeTick tick = currentList[lastIndex];
     tick.content.replace(searched, newContent);
     currentList.updateItem(tick, lastIndex);
+    fileModified = true;
+
     updateListItem(lastIndex);
 }
 
@@ -899,6 +905,9 @@ void MainWindow::onTimelineReplaceAll(QString searched,
         currentList.updateItem(tick, i);
         count++;
     }
+    if (count > 0)
+        fileModified = true;
+
     updateList();
     lastIndex = i;
     QMessageBox::information(this,
