@@ -154,6 +154,20 @@ void TimeLine::sort(int field)
     }
 }
 
+void TimeLine::getIndexesByTime(qint64 timeStamp,
+                                qint64 timeInterval,
+                                QList<int>& indexList)
+{
+    for (int i=0; i<list.count(); i++)
+    {
+        if (list[i].startTime < timeStamp &&
+            ((timeInterval <= 0 && list[i].endTime  >= timeStamp) ||
+             list[i].startTime + timeInterval >= timeStamp)
+           )
+            indexList.append(i);
+    }
+}
+
 const char* Punctor_getTimeFieldFormat(int value, int minLength)
 {
     if (value < 10 && minLength < 2)

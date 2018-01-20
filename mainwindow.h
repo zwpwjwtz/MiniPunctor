@@ -73,6 +73,7 @@ private slots:
     void on_actionAdjust_all_ticks_triggered();
     void on_actionMove_up_triggered();
     void on_actionMove_down_triggered();
+    void on_actionFollow_timer_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -95,6 +96,7 @@ private:
     bool isPuncturing;
     bool isCutting;
     bool fileModified;
+    bool followTimer;
 
     void showTime(qint64 timeTick);
     QString& tickToItemText(const TimeTick &tick);

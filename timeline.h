@@ -44,6 +44,9 @@ public:
     void clear();
     bool existId(QString id);
     QString getUnusedId();
+    void getIndexesByTime(qint64 timeStamp,
+                          qint64 timeInterval,
+                          QList<int>& indexList);
     static QString timeStampToString(qint64 timeStamp, QString format);
     static qint64 stringToTimeStamp(QString str, QString format);
 

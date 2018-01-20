@@ -459,6 +459,8 @@
     <addaction name="actionAdjust_selected"/>
     <addaction name="actionAdjust_all_ticks"/>
     <addaction name="separator"/>
+    <addaction name="actionFollow_timer"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -635,6 +637,20 @@
   <action name="actionClear_all_ticks">
    <property name="text">
     <string>Clear all ticks</string>
+   </property>
+  </action>
+  <action name="actionFollow_timer">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Follow timer</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

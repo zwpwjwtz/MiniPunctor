@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     isPuncturing = false;
     fileModified = false;
+    followTimer = true;
     lastSelectedIndex = -1;
 }
 
@@ -912,6 +913,26 @@ void MainWindow::onTimerTimeout()
 {
     currentTime += timerInterval;
     showTime(currentTime);
+
+    if (!followTimer)
+        return;
+
+    // Get all ticks that correspond to current time
+    QList<int> currentTicks;
+    currentList.getIndexesByTime(currentTime,
+                                 timerInterval,
+                                 currentTicks);
+    int count = currentTicks.count();
+    if (count > 0)
+    {
+        ui->listTimeline->clearSelection();
+        for (int i=0; i<count; i++)
+            ui->listTimeline->item(currentTicks[i])->setSelected(true);
+
+        // Scroll to the last tick in "currentTicks"
+        ui->listTimeline->scrollToItem(
+                    ui->listTimeline->item(currentTicks[count - 1]));
+    }
 }
 
 bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)
@@ -924,4 +945,9 @@ bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)
     for(i=itemList.constBegin(); i!=itemList.constEnd(); i++)
         indexList.append(list->row(*i));
     return true;
+}
+
+void MainWindow::on_actionFollow_timer_triggered()
+{
+    followTimer = ui->actionFollow_timer->isChecked();
 }
