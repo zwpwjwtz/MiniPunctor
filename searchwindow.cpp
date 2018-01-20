@@ -15,15 +15,15 @@ SearchWindow::SearchWindow(QWidget *parent) :
     connect(this,
             SIGNAL(searchTimeline(QString, int&)),
             parent,
-            SLOT(on_timeline_search(QString, int&)));
+            SLOT(onTimelineSearch(QString, int&)));
     connect(this,
             SIGNAL(replaceTimeline(QString, QString, int&)),
             parent,
-            SLOT(on_timeline_replace(QString, QString, int&)));
+            SLOT(onTimelineReplace(QString, QString, int&)));
     connect(this,
             SIGNAL(replaceTimelineAll(QString, QString, int&)),
             parent,
-            SLOT(on_timeline_replace_all(QString, QString, int&)));
+            SLOT(onTimelineReplaceAll(QString, QString, int&)));
 }
 
 SearchWindow::~SearchWindow()

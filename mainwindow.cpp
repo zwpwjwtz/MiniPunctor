@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&timer,
             SIGNAL(timeout()),
             this,
-            SLOT(on_timer_timeout()));
+            SLOT(onTimerTimeout()));
 
     timerState = 0;
     timerInterval = 100;
@@ -273,12 +273,6 @@ void MainWindow::resizeEvent(QResizeEvent* event)
     ui->frameListButtonRight->move(ui->frameListOperation->width() -
                                    ui->frameListButtonRight->width(), 0);
     event->accept();
-}
-
-void MainWindow::on_timer_timeout()
-{
-    currentTime += timerInterval;
-    showTime(currentTime);
 }
 
 void MainWindow::on_bUDMin_clicked(int button)
@@ -866,7 +860,7 @@ void MainWindow::on_actionMove_down_triggered()
     on_buttonListMoveDown_clicked();
 }
 
-void MainWindow::on_timeline_search(QString searched, int &lastIndex)
+void MainWindow::onTimelineSearch(QString searched, int &lastIndex)
 {
     lastIndex = searchText(searched, lastIndex);
 
@@ -876,11 +870,11 @@ void MainWindow::on_timeline_search(QString searched, int &lastIndex)
                                  "Searching finished. No matched found.");
 }
 
-void MainWindow::on_timeline_replace(QString searched,
-                                     QString newContent,
-                                     int& lastIndex)
+void MainWindow::onTimelineReplace(QString searched,
+                                   QString newContent,
+                                   int& lastIndex)
 {
-    on_timeline_search(searched, lastIndex);
+    onTimelineSearch(searched, lastIndex);
     if (lastIndex < 0) return;
 
     TimeTick tick = currentList[lastIndex];
@@ -889,9 +883,9 @@ void MainWindow::on_timeline_replace(QString searched,
     updateListItem(lastIndex);
 }
 
-void MainWindow::on_timeline_replace_all(QString searched,
-                                         QString newContent,
-                                         int& lastIndex)
+void MainWindow::onTimelineReplaceAll(QString searched,
+                                      QString newContent,
+                                      int& lastIndex)
 {
     int i = lastIndex, count = 0;
     while(true)
@@ -912,6 +906,12 @@ void MainWindow::on_timeline_replace_all(QString searched,
                                               "%d items replaced.",
                                               count),
                              QMessageBox::Ok);
+}
+
+void MainWindow::onTimerTimeout()
+{
+    currentTime += timerInterval;
+    showTime(currentTime);
 }
 
 bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)

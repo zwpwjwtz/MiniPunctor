@@ -22,15 +22,15 @@ public:
     ~MainWindow();    
 
 public slots:
-    void on_timeline_search(QString searched, int& lastIndex);
-    void on_timeline_replace(QString searched,
+    void onTimelineSearch(QString searched, int& lastIndex);
+    void onTimelineReplace(QString searched,
                              QString newContent,
                              int& lastIndex);
-    void on_timeline_replace_all(QString searched,
+    void onTimelineReplaceAll(QString searched,
                                  QString newContent,
                                  int& lastIndex);
 private slots:
-    void on_timer_timeout();
+    void onTimerTimeout();
 
     void on_bUDMin_clicked(int button);
     void on_bUDSec_clicked(int button);
