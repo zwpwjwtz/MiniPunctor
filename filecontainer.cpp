@@ -33,7 +33,7 @@ FileContainer::FileErrorNumber FileContainer::open(QString path,
     else
     {
         header = readUntil(file, bodyBegin);
-        readUntil(file, recordSeparator);
+        header.append(bodyBegin).append(readUntil(file, recordSeparator));
     }
     footer.clear();
 
