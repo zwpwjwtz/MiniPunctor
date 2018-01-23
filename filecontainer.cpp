@@ -211,6 +211,13 @@ void FileContainer::setFileType(FileType file_type)
             timeFormat = PUNCTOR_FILE_FORMAT_SMI_TIME;
             recordSeparator = PUNCTOR_FILE_FORMAT_SMI_SEP;
             break;
+        case SSA:
+            bodyBegin = PUNCTOR_FILE_FORMAT_SSA_BODYBEGIN;
+            recSepPos = PUNCTOR_FILE_FORMAT_SSA_SEPPOS;
+            recordFormat = PUNCTOR_FILE_FORMAT_SSA_RECORD;
+            timeFormat = PUNCTOR_FILE_FORMAT_SSA_TIME;
+            recordSeparator = PUNCTOR_FILE_FORMAT_SSA_SEP;
+            break;
         case PlainText:
         default:
             recSepPos = PUNCTOR_FILE_FORMAT_PLAIN_SEPPOS;
@@ -421,6 +428,8 @@ FileContainer::FileType FileContainer::guessFileType(QString filePath)
         tempType = SRT;
     else if (suffix == "smi")
         tempType = SMI;
+    else if (suffix == "ssa")
+        tempType = SSA;
     else
         tempType = PlainText;
     return tempType;

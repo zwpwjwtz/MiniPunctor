@@ -3,6 +3,7 @@
 
 
 const char* Punctor_getTimeFieldFormat(int value, int minLength);
+int Punctor_findFirstNonDigit(const QString& str, int pos);
 
 TimeLine::TimeLine()
 {
@@ -192,6 +193,17 @@ const char* Punctor_getTimeFieldFormat(int value, int minLength)
         return "";
 }
 
+int Punctor_findFirstNonDigit(const QString& str, int pos)
+{
+    while (pos < str.length())
+    {
+        if (str[pos] < 0x30 || str[pos] > 0x39)
+            break;
+        pos++;
+    }
+    return pos;
+}
+
 QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
 {
     QString tempTime(format);
@@ -199,6 +211,13 @@ QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
     static char buf[8];
 
     timeStamp = std::abs(timeStamp) % 360000000;
+    if (format.contains(PUNCTOR_TIME_FORMAT_HOURS))
+    {
+        tempInt = timeStamp / 3600000;
+        std::sprintf(buf, Punctor_getTimeFieldFormat(tempInt, 1), tempInt);
+        tempTime.replace(PUNCTOR_TIME_FORMAT_HOURS, buf);
+        timeStamp %= 3600000;
+    }
     if (format.contains(PUNCTOR_TIME_FORMAT_HOUR))
     {
         tempInt = timeStamp / 3600000;
@@ -206,12 +225,26 @@ QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
         tempTime.replace(PUNCTOR_TIME_FORMAT_HOUR, buf);
         timeStamp %= 3600000;
     }
+    if (format.contains(PUNCTOR_TIME_FORMAT_MINS))
+    {
+        tempInt = timeStamp / 60000;
+        std::sprintf(buf, Punctor_getTimeFieldFormat(tempInt, 1), tempInt);
+        tempTime.replace(PUNCTOR_TIME_FORMAT_MINS, buf);
+        timeStamp %= 60000;
+    }
     if (format.contains(PUNCTOR_TIME_FORMAT_MIN))
     {
         tempInt = timeStamp / 60000;
         std::sprintf(buf, Punctor_getTimeFieldFormat(tempInt, 2), tempInt);
         tempTime.replace(PUNCTOR_TIME_FORMAT_MIN, buf);
         timeStamp %= 60000;
+    }
+    if (format.contains(PUNCTOR_TIME_FORMAT_SECS))
+    {
+        tempInt = timeStamp / 1000;
+        std::sprintf(buf, Punctor_getTimeFieldFormat(tempInt, 1), tempInt);
+        tempTime.replace(PUNCTOR_TIME_FORMAT_SECS, buf);
+        timeStamp %= 1000;
     }
     if (format.contains(PUNCTOR_TIME_FORMAT_SEC))
     {
@@ -251,14 +284,8 @@ qint64 TimeLine::stringToTimeStamp(QString str, QString format)
     p = format.indexOf(PUNCTOR_TIME_FORMAT_MSECS);
     if (p >= 0)
     {
-        int q = p + 1;
-        while (q < str.length())
-        {
-            if (str[q] < 0x30 || str[q] > 0x39)
-                break;
-            q++;
-        }
-        fraction = str.mid(p, q - p + 1).toInt(&OK);
+        fraction = str.mid(p, Punctor_findFirstNonDigit(str, p) - p + 1)
+                      .toInt(&OK);
         tempTime += fraction;
         valid = true;
     }
@@ -282,6 +309,15 @@ qint64 TimeLine::stringToTimeStamp(QString str, QString format)
         }
     }
 
+    p = format.indexOf(PUNCTOR_TIME_FORMAT_SECS);
+    if (p >= 0)
+    {
+        fraction = str.mid(p, Punctor_findFirstNonDigit(str, p) - p + 1)
+                      .toInt(&OK);
+        tempTime += fraction * 1000;
+        valid = true;
+    }
+
     p = format.indexOf(PUNCTOR_TIME_FORMAT_SEC);
     if (p >= 0 && OK)
     {
@@ -290,11 +326,29 @@ qint64 TimeLine::stringToTimeStamp(QString str, QString format)
         valid = true;
     }
 
+    p = format.indexOf(PUNCTOR_TIME_FORMAT_MINS);
+    if (p >= 0)
+    {
+        fraction = str.mid(p, Punctor_findFirstNonDigit(str, p) - p + 1)
+                      .toInt(&OK);
+        tempTime += fraction * 60000;
+        valid = true;
+    }
+
     p = format.indexOf(PUNCTOR_TIME_FORMAT_MIN);
     if (p >= 0 && OK)
     {
         fraction = str.mid(p, ::strlen(PUNCTOR_TIME_FORMAT_MIN)).toInt(&OK);
         tempTime += fraction * 60000;
+        valid = true;
+    }
+
+    p = format.indexOf(PUNCTOR_TIME_FORMAT_HOURS);
+    if (p >= 0)
+    {
+        fraction = str.mid(p, Punctor_findFirstNonDigit(str, p) - p)
+                      .toInt(&OK);
+        tempTime += fraction * 3600000;
         valid = true;
     }
 

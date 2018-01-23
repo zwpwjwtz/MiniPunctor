@@ -15,6 +15,7 @@ public:
         LRC = 1,
         SRT = 2,
         SMI = 3,
+        SSA = 4,
         Customized = 255,
     };
 
