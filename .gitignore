@@ -1,5 +1,5 @@
 *.bak
-f3-qt
+MiniPunctor
 *.o
 moc*
 ui*.h

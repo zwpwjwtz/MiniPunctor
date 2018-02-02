@@ -58,3 +58,7 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     icon.qrc
+
+target.path = $${PREFIX}/bin/
+
+INSTALLS += target

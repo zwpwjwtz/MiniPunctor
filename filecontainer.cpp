@@ -161,6 +161,7 @@ FileContainer::FileErrorNumber FileContainer::saveAs(TimeLine &recordList,
 void FileContainer::close()
 {
     filePath.clear();
+    setFileType(PlainText);
 }
 
 QString FileContainer::getFilePath()
