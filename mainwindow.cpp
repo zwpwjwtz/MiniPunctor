@@ -223,8 +223,17 @@ void MainWindow::shiftSelectedTicks(qint64 value)
         tick.endTime += value;
         currentList.updateItem(tick, *i);
     }
-    fileModified = true;
+    setFileModified(true);
     updateList();
+}
+
+void MainWindow::setFileModified(bool modified)
+{
+    fileModified = modified;
+    if (modified && !currentFile.getFilePath().isEmpty())
+        updateTitle(currentFile.getFilePath().append(" * "));
+    else
+        updateTitle(currentFile.getFilePath());
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -323,7 +332,7 @@ void MainWindow::on_buttonPunc_clicked()
     ui->listTimeline->insertItem(i,
                                  TimeLine::timeStampToString(
                                     currentTime, currentFile.getTimeFormat()));
-    fileModified = true;
+    setFileModified(true);
 }
 
 void MainWindow::on_buttonStart_clicked()
@@ -382,7 +391,7 @@ void MainWindow::on_actionSave_File_triggered()
                               "and you have the permission to write file.");
         return;
     }
-    fileModified = false;
+    setFileModified(false);
 }
 
 void MainWindow::on_actionSave_File_As_triggered()
@@ -414,10 +423,9 @@ void MainWindow::on_actionSave_File_As_triggered()
         currentFile.setFileType(oldType);
         return;
     }
-    fileModified = false;
+    setFileModified(false);
     if (oldType != currentFile.getFileType())
         updateList();
-    updateTitle(path);
 }
 
 void MainWindow::on_actionOpen_File_triggered()
@@ -489,10 +497,9 @@ void MainWindow::on_actionOpen_File_triggered()
          }
     }
 
-    fileModified = false;
     lastSelectedIndex = 0;
+    setFileModified(false);
     updateList();
-    updateTitle(path);
 }
 
 void MainWindow::on_actionNew_File_triggered()
@@ -518,11 +525,10 @@ void MainWindow::on_actionNew_File_triggered()
     }
     currentList.clear();
     currentFile.close();
-    fileModified = false;
+    setFileModified(false);
     lastSelectedIndex = 0;
 
     ui->listTimeline->clear();
-    updateTitle("");
 }
 
 void MainWindow::on_buttonListRemove_clicked()
@@ -554,7 +560,7 @@ void MainWindow::on_buttonListRemove_clicked()
     {
         currentList.removeItem(*j);
     }
-    fileModified = true;
+    setFileModified(true);
 }
 
 void MainWindow::on_buttonListInsert_clicked()
@@ -738,7 +744,7 @@ void MainWindow::on_actionPaste_triggered()
             lastSelectedIndex++;
     }
     currentList.addItem(tempItem, insertPos);
-    fileModified = true;
+    setFileModified(true);
 
     updateList();
 }
@@ -764,7 +770,7 @@ void MainWindow::on_actionInsert_before_triggered()
                                  TimeLine::timeStampToString(currentTime,
                                                  currentFile.getTimeFormat()));
     currentList.addItem(tick, indexList.first());
-    fileModified = true;
+    setFileModified(true);
 }
 
 void MainWindow::on_actionCreate_tick_behind_triggered()
@@ -780,7 +786,7 @@ void MainWindow::on_actionCreate_tick_behind_triggered()
                                  TimeLine::timeStampToString(currentTime,
                                                  currentFile.getTimeFormat()));
     currentList.addItem(tick, indexList.last() + 1);
-    fileModified = true;
+    setFileModified(true);
 }
 
 void MainWindow::on_actionSelect_all_triggered()
@@ -811,14 +817,14 @@ void MainWindow::on_actionFind_Replace_triggered()
 void MainWindow::on_actionSort_by_start_time_triggered()
 {
     currentList.sort(PUNCTOR_TIME_FIELD_START);
-    fileModified = true;
+    setFileModified(true);
     updateList();
 }
 
 void MainWindow::on_actionSort_by_end_time_triggered()
 {
     currentList.sort(PUNCTOR_TIME_FIELD_END);
-    fileModified = true;
+    setFileModified(true);
     updateList();
 
 }
@@ -826,7 +832,7 @@ void MainWindow::on_actionSort_by_end_time_triggered()
 void MainWindow::on_actionSort_by_tick_ID_triggered()
 {
     currentList.sort(PUNCTOR_TIME_FIELD_ID);
-    fileModified = true;
+    setFileModified(true);
     updateList();
 }
 
@@ -838,7 +844,7 @@ void MainWindow::on_actionAdjust_selected_triggered()
     if (tickShifter->accepted)
     {
         shiftSelectedTicks(tickShifter->shiftValue);
-        fileModified = true;
+        setFileModified(true);
     }
 }
 
@@ -851,7 +857,7 @@ void MainWindow::on_actionAdjust_all_ticks_triggered()
     {
         ui->listTimeline->selectAll();
         shiftSelectedTicks(tickShifter->shiftValue);
-        fileModified = true;
+        setFileModified(true);
     }
 }
 
@@ -885,7 +891,7 @@ void MainWindow::onTimelineReplace(QString searched,
     TimeTick tick = currentList[lastIndex];
     tick.content.replace(searched, newContent);
     currentList.updateItem(tick, lastIndex);
-    fileModified = true;
+    setFileModified(true);
 
     updateListItem(lastIndex);
 }
@@ -906,7 +912,7 @@ void MainWindow::onTimelineReplaceAll(QString searched,
         count++;
     }
     if (count > 0)
-        fileModified = true;
+        setFileModified(true);
 
     updateList();
     lastIndex = i;

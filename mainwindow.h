@@ -106,6 +106,7 @@ private:
     bool sureToExit(bool manualClose);
     int searchText(const QString &str, int lastIndex);
     void shiftSelectedTicks(qint64 value);
+    void setFileModified(bool modified);
 
 protected:
     void closeEvent(QCloseEvent* event);
