@@ -439,9 +439,25 @@
     <addaction name="actionFollow_timer"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuPlayer">
+    <property name="title">
+     <string>Player</string>
+    </property>
+    <widget class="QMenu" name="menuBind_a_player">
+     <property name="title">
+      <string>Bind a player</string>
+     </property>
+    </widget>
+    <addaction name="separator"/>
+    <addaction name="menuBind_a_player"/>
+    <addaction name="separator"/>
+    <addaction name="actionShift_synchronization"/>
+    <addaction name="actionSynchronize_with_player"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTimeline"/>
+   <addaction name="menuPlayer"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionNew_File">
@@ -640,6 +656,32 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionSynchronize_with_player">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Synchronize with player</string>
+   </property>
+  </action>
+  <action name="actionShift_synchronization">
+   <property name="text">
+    <string>Shift synchronization</string>
+   </property>
+  </action>
+  <action name="actionDisable">
+   <property name="text">
+    <string>Disable</string>
+   </property>
+  </action>
+  <action name="actionDisable_2">
+   <property name="text">
+    <string>Disable</string>
    </property>
   </action>
  </widget>

@@ -14,6 +14,7 @@ class TickShiftWindow : public QDialog
 public:
     explicit TickShiftWindow(QWidget *parent = 0);
     ~TickShiftWindow();
+    void setPrompt(const QString text);
 
     qint64 shiftValue;
     bool accepted;

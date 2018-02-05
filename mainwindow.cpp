@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timerState = 0;
     timerInterval = 100;
     timer.setInterval(timerInterval);
+    playerSyncShift = 0;
 
     currentTime = 0;
     showTime(currentTime);
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     isPuncturing = false;
     fileModified = false;
     followTimer = true;
+    synchronized = true;
     lastSelectedIndex = -1;
 }
 
@@ -331,16 +333,24 @@ void MainWindow::on_buttonStart_clicked()
     switch (timerState) {
     case 0: //Stop
         currentTime = 0;
+        if (synchronized)
+            currentTime += playerSyncShift;
+        if (!bindedPlayer.isEmpty() && synchronized)
+            player.play(bindedPlayer);
     case 2: //Pause
         timerState = 1;
         isPuncturing = true;
         timer.start();
+        if (!bindedPlayer.isEmpty()  && synchronized)
+            player.play(bindedPlayer);
         ui->buttonStart->setText("Pause");
         break;
     case 1: //Counting
         timerState = 2;
         isPuncturing =false;
         timer.stop();
+        if (!bindedPlayer.isEmpty() && synchronized)
+            player.pause(bindedPlayer);
         ui->buttonStart->setText("Resume");
     default:
         break;
@@ -352,6 +362,8 @@ void MainWindow::on_buttonStop_clicked()
     timerState = 0;
     isPuncturing = false;
     timer.stop();
+    if (!bindedPlayer.isEmpty() && synchronized)
+        player.stop(bindedPlayer);
     ui->buttonStart->setText("Start");
 }
 
@@ -685,6 +697,52 @@ void MainWindow::on_listTimeline_customContextMenuRequested(const QPoint &pos)
     menuTimeline->exec(QCursor::pos());
 }
 
+void MainWindow::on_menuBind_a_player_aboutToShow()
+{
+    int i;
+    QList<QAction*> actionList = ui->menuBind_a_player->actions();
+
+    QString checkedAction;
+    for (i=0; i<actionList.count(); i++)
+    {
+        if (actionList[i]->isChecked())
+            checkedAction = actionList[i]->text();
+        ui->menuBind_a_player->removeAction(actionList[i]);
+    }
+
+    int count = player.getPlayerList(playerNames, playerIDs);
+    if (count < 1)
+    {
+        ui->menuBind_a_player->addAction("(No player detected)");
+        return;
+    }
+
+    QAction* action;
+    for (i=0; i<playerNames.count(); i++)
+    {
+        action = new QAction(playerNames[i], ui->menuBind_a_player);
+        action->setCheckable(true);
+        if (checkedAction == playerNames[i])
+            action->setChecked(true);
+        ui->menuBind_a_player->addAction(action);
+    }
+}
+
+void MainWindow::on_menuBind_a_player_triggered(QAction* action)
+{
+    for (int i=0; i<playerNames.count(); i++)
+    {
+        if (playerNames[i] == action->text())
+        {
+            if (action->isChecked())
+                bindedPlayer = playerIDs[i];
+            else
+                bindedPlayer.clear();
+            break;
+        }
+    }
+}
+
 bool MainWindow::on_actionCopy_triggered()
 {
     QList<int> indexList;
@@ -834,6 +892,7 @@ void MainWindow::on_actionAdjust_selected_triggered()
 {
     if (!tickShifter)
         tickShifter = new TickShiftWindow(this);
+    tickShifter->setPrompt("Shift selected tick with:");
     tickShifter->exec();
     if (tickShifter->accepted)
     {
@@ -959,4 +1018,25 @@ bool Punctor_getSelectedItemIndex(QListWidget* list, QList<int>& indexList)
 void MainWindow::on_actionFollow_timer_triggered()
 {
     followTimer = ui->actionFollow_timer->isChecked();
+}
+
+void MainWindow::on_actionDisable_2_triggered()
+{
+    bindedPlayer.clear();
+}
+
+void MainWindow::on_actionSynchronize_with_player_triggered()
+{
+    synchronized = ui->actionSynchronize_with_player->isChecked();
+}
+
+void MainWindow::on_actionShift_synchronization_triggered()
+{
+    if (!tickShifter)
+    {
+        tickShifter = new TickShiftWindow;
+    }
+    tickShifter->setPrompt("Set player sync. shift:");
+    tickShifter->exec();
+    playerSyncShift = tickShifter->shiftValue;
 }

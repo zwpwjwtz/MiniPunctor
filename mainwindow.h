@@ -8,6 +8,8 @@
 #include "tickshiftwindow.h"
 #include "filecontainer.h"
 #include "searchwindow.h"
+#include "mediacontrol.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -49,6 +51,8 @@ private slots:
     void on_listTimeline_doubleClicked(const QModelIndex &index);
     void on_listTimeline_customContextMenuRequested(const QPoint &pos);
 
+    void on_menuBind_a_player_aboutToShow();
+    void on_menuBind_a_player_triggered(QAction* action);
     void on_actionAbout_triggered();
     void on_actionExit_triggered();
     void on_actionSave_File_triggered();
@@ -73,6 +77,9 @@ private slots:
     void on_actionMove_up_triggered();
     void on_actionMove_down_triggered();
     void on_actionFollow_timer_triggered();
+    void on_actionDisable_2_triggered();
+    void on_actionSynchronize_with_player_triggered();
+    void on_actionShift_synchronization_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -81,6 +88,7 @@ private:
     TickShiftWindow* tickShifter;
     SearchWindow* search;
     QMenu* menuTimeline;
+    MediaControl player;
     QTimer timer;
     FileContainer currentFile;
     TimeLine currentList;
@@ -88,14 +96,19 @@ private:
     int timerState;
     qint64 currentTime;
     int lastSelectedIndex;
+    int playerSyncShift;
     QString lastOpeningPath;
     QString lastSavingPath;
     QString lastOpeningFilter;
     QString lastSavingFilter;
+    QString bindedPlayer;
+    QList<QString> playerIDs;
+    QList<QString> playerNames;
     bool isPuncturing;
     bool isCutting;
     bool fileModified;
     bool followTimer;
+    bool synchronized;
 
     void showTime(qint64 timeTick);
     QString& tickToItemText(const TimeTick &tick);
