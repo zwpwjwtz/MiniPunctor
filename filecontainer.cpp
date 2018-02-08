@@ -88,7 +88,10 @@ FileContainer::FileErrorNumber FileContainer::save(TimeLine &recordList)
     QString tempRecord;
     QString tempTime;
 
-    file.write(header);
+    if (header.isEmpty())
+        file.write(defaultHeader);
+    else
+        file.write(header);
     for (int i=0; i<count; i++)
     {
         tempRecord = recordFormat;
@@ -120,7 +123,10 @@ FileContainer::FileErrorNumber FileContainer::save(TimeLine &recordList)
 
         file.write(tempRecord.toLocal8Bit());
     }
-    file.write(footer);
+    if (footer.isEmpty())
+        file.write(defaultFooter);
+    else
+        file.write(footer);
 
     file.close();
     return fileOK;
@@ -176,6 +182,8 @@ FileContainer::FileType FileContainer::getFileType()
 
 void FileContainer::setFileType(FileType file_type)
 {
+    defaultHeader.clear();
+    defaultFooter.clear();
     bodyBegin.clear();
     bodyEnd.clear();
 
@@ -194,6 +202,8 @@ void FileContainer::setFileType(FileType file_type)
             recSepPos = PUNCTOR_FILE_FORMAT_SRT_SEPPOS;
             break;
         case SMI:
+            defaultHeader = PUNCTOR_FILE_FORMAT_SMI_HEADER;
+            defaultFooter = PUNCTOR_FILE_FORMAT_SMI_FOOTER;
             bodyBegin = PUNCTOR_FILE_FORMAT_SMI_BODYBEGIN;
             bodyEnd = PUNCTOR_FILE_FORMAT_SMI_BODYEND;
             recSepPos = PUNCTOR_FILE_FORMAT_SMI_SEPPOS;

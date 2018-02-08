@@ -46,6 +46,7 @@ private:
     FileType _fileType;
     QByteArray header, footer;
     QByteArray bodyBegin, bodyEnd;
+    QByteArray defaultHeader, defaultFooter;
     int recSepPos;
     QString recordSeparator;
     QString recordFormat;
