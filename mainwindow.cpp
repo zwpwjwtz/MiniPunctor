@@ -415,11 +415,11 @@ void MainWindow::on_actionSave_File_As_triggered()
     if (currentFile.saveAs(currentList, path) != FileContainer::fileOK)
     {
         QMessageBox::critical(this,"Error while saving file as",
-                              QString("Cannot save file as ")
-                              .append('"').append(path).append('"')
-                              .append("\nPlease check "
+                              QString("Cannot save file as ""%1"""
+                              "\nPlease check "
                               "if there is enough space on the disk,\n"
-                              "and you have the permission to write file."));
+                              "and you have the permission to write file.")
+                              .arg(path));
         currentFile.setFileType(oldType);
         return;
     }
@@ -464,8 +464,11 @@ void MainWindow::on_actionOpen_File_triggered()
         return;
     lastOpeningPath = path;
 
+    QString oldTitle = windowTitle();
     FileContainer::FileErrorNumber openError;
+    setWindowTitle(QString("Loading file %1 ...").arg(path));
     openError = currentFile.open(path, currentList, false);
+    setWindowTitle(oldTitle);
     if (openError == FileContainer::openFail)
     {
         QMessageBox::critical(this,
@@ -490,9 +493,9 @@ void MainWindow::on_actionOpen_File_triggered()
             QMessageBox::critical(this,
                                   "Error while opening",
                                   QString("We are not able to parse "
-                                  "the content of file \n""")
-                                  .append('"').append(path).append('"')
-                                  .append("\nThe file may be corrupted."));
+                                  "the content of file \n"
+                                  """%1""\n"
+                                  "The file may be corrupted.").arg(path));
              return;
          }
     }
