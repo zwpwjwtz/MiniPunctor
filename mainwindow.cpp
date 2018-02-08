@@ -16,6 +16,11 @@
 #define PUNCTOR_FILE_SUFFIX_SRT "Subtitle file (*.srt)(*.srt)"
 #define PUNCTOR_FILE_SUFFIX_SMI "Windows Media Player Subtitle (*.smi)(*.smi)"
 
+#define PUNCTOR_TIMER_STATE_STOP        0
+#define PUNCTOR_TIMER_STATE_COUNTING    1
+#define PUNCTOR_TIMER_STATE_PAUSE       2
+
+
 bool Punctor_getSelectedItemIndex(QListWidget* list,
                                   QList<int>& indexList);
 
@@ -38,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             SLOT(onTimerTimeout()));
 
-    timerState = 0;
+    timerState = PUNCTOR_TIMER_STATE_STOP;
     timerInterval = 100;
     timer.setInterval(timerInterval);
     playerSyncShift = 0;
@@ -50,7 +55,6 @@ MainWindow::MainWindow(QWidget *parent) :
     lastOpeningPath = ".";
     lastSavingPath = ".";
 
-    isPuncturing = false;
     fileModified = false;
     followTimer = true;
     synchronized = true;
@@ -151,7 +155,7 @@ void MainWindow::moveSelectedArea(int delta)
 
 bool MainWindow::sureToExit(bool manualClose)
 {
-    if (!manualClose && isPuncturing)
+    if (!manualClose && timerState == PUNCTOR_TIMER_STATE_COUNTING)
     {
         if (QMessageBox::question(this,"Quit MiniPunctor",
                               "The program is puncturing now.\n"
@@ -227,6 +231,31 @@ void MainWindow::shiftSelectedTicks(qint64 value)
     }
     fileModified = true;
     updateList();
+}
+
+void MainWindow::startTimer(bool reset)
+{
+    if (timerState == PUNCTOR_TIMER_STATE_STOP || reset)
+    {
+        currentTime = 0;
+        if (synchronized)
+            currentTime = playerSyncShift;
+    }
+
+    timer.start();
+    timerState = PUNCTOR_TIMER_STATE_COUNTING;
+}
+
+void MainWindow::stopTimer()
+{
+    timer.stop();
+    timerState = PUNCTOR_TIMER_STATE_STOP;
+}
+
+void MainWindow::pauseTimer()
+{
+    timer.stop();
+    timerState = PUNCTOR_TIMER_STATE_PAUSE;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -331,24 +360,15 @@ void MainWindow::on_buttonPunc_clicked()
 void MainWindow::on_buttonStart_clicked()
 {
     switch (timerState) {
-    case 0: //Stop
-        currentTime = 0;
-        if (synchronized)
-            currentTime += playerSyncShift;
-        if (!bindedPlayer.isEmpty() && synchronized)
-            player.play(bindedPlayer);
-    case 2: //Pause
-        timerState = 1;
-        isPuncturing = true;
-        timer.start();
+    case PUNCTOR_TIMER_STATE_STOP:
+    case PUNCTOR_TIMER_STATE_PAUSE:
         if (!bindedPlayer.isEmpty()  && synchronized)
             player.play(bindedPlayer);
+        startTimer(false);
         ui->buttonStart->setText("Pause");
         break;
-    case 1: //Counting
-        timerState = 2;
-        isPuncturing =false;
-        timer.stop();
+    case PUNCTOR_TIMER_STATE_COUNTING:
+        pauseTimer();
         if (!bindedPlayer.isEmpty() && synchronized)
             player.pause(bindedPlayer);
         ui->buttonStart->setText("Resume");
@@ -359,9 +379,7 @@ void MainWindow::on_buttonStart_clicked()
 
 void MainWindow::on_buttonStop_clicked()
 {
-    timerState = 0;
-    isPuncturing = false;
-    timer.stop();
+    stopTimer();
     if (!bindedPlayer.isEmpty() && synchronized)
         player.stop(bindedPlayer);
     ui->buttonStart->setText("Start");
@@ -1038,5 +1056,54 @@ void MainWindow::on_actionShift_synchronization_triggered()
     }
     tickShifter->setPrompt("Set player sync. shift:");
     tickShifter->exec();
-    playerSyncShift = tickShifter->shiftValue;
+    if (tickShifter->accepted)
+        playerSyncShift = tickShifter->shiftValue;
+}
+
+void MainWindow::on_actionPlay_Pause_triggered()
+{
+    if (bindedPlayer.isEmpty())
+        return;
+    if (player.getStatus(bindedPlayer) == MediaControl::status_playing)
+    {
+        player.pause(bindedPlayer);
+        if (synchronized)
+            pauseTimer();
+    }
+    else
+    {
+        player.play(bindedPlayer);
+        if (synchronized)
+            startTimer(false);
+    }
+}
+
+void MainWindow::on_actionStop_triggered()
+{
+    if (bindedPlayer.isEmpty())
+        return;
+    player.stop(bindedPlayer);
+
+    if (synchronized)
+        stopTimer();
+}
+
+void MainWindow::on_actionPrevious_triggered()
+{
+    if (bindedPlayer.isEmpty())
+        return;
+    player.previous(bindedPlayer);
+
+    if (synchronized)
+        startTimer(true);
+}
+
+void MainWindow::on_actionNext_triggered()
+{
+    if (bindedPlayer.isEmpty())
+        return;
+    player.next(bindedPlayer);
+
+    if (synchronized)
+        startTimer(true);
 }

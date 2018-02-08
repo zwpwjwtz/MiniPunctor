@@ -20,6 +20,9 @@
 #define PUNCTOR_MPRIS_PLAYER_METHOD_PAUSE "Pause"
 #define PUNCTOR_MPRIS_PLAYER_METHOD_STOP "Stop"
 #define PUNCTOR_MPRIS_PLAYER_METHOD_SEEK "Seek"
+#define PUNCTOR_MPRIS_PLAYER_METHOD_PREV "Previous"
+#define PUNCTOR_MPRIS_PLAYER_METHOD_NEXT "Next"
+
 
 
 MediaControl::MediaControl()
@@ -67,6 +70,10 @@ MediaControl::MediaStatus MediaControl::getStatus(QString playerID)
                           .toString();
     if (status == "Stopped")
         return status_stopped;
+    else if (status == "Playing")
+        return status_playing;
+    else if (status == "Paused")
+        return status_paused;
     return status_unknown;
 }
 
@@ -108,4 +115,20 @@ qint64 MediaControl::getPosition(QString playerID)
                          PUNCTOR_MPRIS_OBJECT_PATH,
                          PUNCTOR_MPRIS_PLAYER_INTERFACE);
     return iface.property(PUNCTOR_MPRIS_PLAYER_PROP_POS).toLongLong();
+}
+
+void MediaControl::previous(QString playerID)
+{
+    QDBusInterface iface(playerID,
+                         PUNCTOR_MPRIS_OBJECT_PATH,
+                         PUNCTOR_MPRIS_PLAYER_INTERFACE);
+    iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_PREV);
+}
+
+void MediaControl::next(QString playerID)
+{
+    QDBusInterface iface(playerID,
+                         PUNCTOR_MPRIS_OBJECT_PATH,
+                         PUNCTOR_MPRIS_PLAYER_INTERFACE);
+    iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_NEXT);
 }

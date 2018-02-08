@@ -80,6 +80,10 @@ private slots:
     void on_actionDisable_2_triggered();
     void on_actionSynchronize_with_player_triggered();
     void on_actionShift_synchronization_triggered();
+    void on_actionPlay_Pause_triggered();
+    void on_actionStop_triggered();
+    void on_actionPrevious_triggered();
+    void on_actionNext_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -104,7 +108,6 @@ private:
     QString bindedPlayer;
     QList<QString> playerIDs;
     QList<QString> playerNames;
-    bool isPuncturing;
     bool isCutting;
     bool fileModified;
     bool followTimer;
@@ -119,6 +122,9 @@ private:
     bool sureToExit(bool manualClose);
     int searchText(const QString &str, int lastIndex);
     void shiftSelectedTicks(qint64 value);
+    void startTimer(bool reset);
+    void stopTimer();
+    void pauseTimer();
 
 protected:
     void closeEvent(QCloseEvent* event);

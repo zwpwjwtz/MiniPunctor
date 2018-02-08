@@ -451,6 +451,11 @@
     <addaction name="separator"/>
     <addaction name="menuBind_a_player"/>
     <addaction name="separator"/>
+    <addaction name="actionPlay_Pause"/>
+    <addaction name="actionStop"/>
+    <addaction name="actionPrevious"/>
+    <addaction name="actionNext"/>
+    <addaction name="separator"/>
     <addaction name="actionShift_synchronization"/>
     <addaction name="actionSynchronize_with_player"/>
    </widget>
@@ -682,6 +687,38 @@
   <action name="actionDisable_2">
    <property name="text">
     <string>Disable</string>
+   </property>
+  </action>
+  <action name="actionPlay_Pause">
+   <property name="text">
+    <string>&amp;Play / Pause</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>&amp;Stop</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+S</string>
+   </property>
+  </action>
+  <action name="actionPrevious">
+   <property name="text">
+    <string>P&amp;revious</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+R</string>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="text">
+    <string>&amp;Next</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+N</string>
    </property>
   </action>
  </widget>

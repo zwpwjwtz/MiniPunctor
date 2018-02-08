@@ -26,6 +26,8 @@ public:
     void stop(QString playerID);
     void seek(QString playerID, qint64 pos);
     qint64 getPosition(QString playerID);
+    void previous(QString playerID);
+    void next(QString playerID);
 };
 
 #endif // MEDIACONTROL_H
