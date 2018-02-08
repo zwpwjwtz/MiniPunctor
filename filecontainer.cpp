@@ -212,6 +212,7 @@ void FileContainer::setFileType(FileType file_type)
             recordSeparator = PUNCTOR_FILE_FORMAT_SMI_SEP;
             break;
         case SSA:
+            defaultHeader = PUNCTOR_FILE_FORMAT_SSA_HEADER;
             bodyBegin = PUNCTOR_FILE_FORMAT_SSA_BODYBEGIN;
             recSepPos = PUNCTOR_FILE_FORMAT_SSA_SEPPOS;
             recordFormat = PUNCTOR_FILE_FORMAT_SSA_RECORD;

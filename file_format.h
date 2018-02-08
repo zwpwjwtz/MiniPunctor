@@ -37,6 +37,18 @@
 #define PUNCTOR_FILE_FORMAT_SMI_RECORD "Start=%TIME1%>%CONT%"
 #define PUNCTOR_FILE_FORMAT_SMI_TIME "Z"
 
+#define PUNCTOR_FILE_FORMAT_SSA_HEADER \
+        "[Script Info]\n"\
+        "ScriptType: v4.00\n"\
+        "Title: <untitled>\n"\
+        "Original Script: <unknown>\n\n"\
+        "[V4 Styles]\nFormat: Name, Fontname, Fontsize, "\
+        "PrimaryColour, SecondaryColour, TertiaryColour, BackColour, "\
+        "Bold, Italic, BorderStyle, Outline, Shadow, Alignment, "\
+        "MarginL, MarginR, MarginV, AlphaLevel, Encoding\n\n"\
+        "[Events]\n"\
+        "Format: Marked, Start, End, Style, Name, "\
+        "MarginL, MarginR, MarginV, Effect, Text\n\n"
 #define PUNCTOR_FILE_FORMAT_SSA_BODYBEGIN "Dialogue: "
 #define PUNCTOR_FILE_FORMAT_SSA_SEP "Dialogue: "
 #define PUNCTOR_FILE_FORMAT_SSA_SEPPOS PUNCTOR_FILE_REC_SEP_INSERT
