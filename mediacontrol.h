@@ -24,7 +24,7 @@ public:
     void play(QString playerID);
     void pause(QString playerID);
     void stop(QString playerID);
-    void seek(QString playerID, qint64 pos);
+    void seek(QString playerID, qint64 offset);
     qint64 getPosition(QString playerID);
     void previous(QString playerID);
     void next(QString playerID);

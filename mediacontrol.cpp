@@ -18,11 +18,15 @@
 #define PUNCTOR_MPRIS_PLAYER_PROP_POS "Position"
 #define PUNCTOR_MPRIS_PLAYER_METHOD_PLAY "Play"
 #define PUNCTOR_MPRIS_PLAYER_METHOD_PAUSE "Pause"
+#define PUNCTOR_MPRIS_PLAYER_METHOD_RESUME "PlayPause"
 #define PUNCTOR_MPRIS_PLAYER_METHOD_STOP "Stop"
 #define PUNCTOR_MPRIS_PLAYER_METHOD_SEEK "Seek"
 #define PUNCTOR_MPRIS_PLAYER_METHOD_PREV "Previous"
 #define PUNCTOR_MPRIS_PLAYER_METHOD_NEXT "Next"
 
+#define PUNCTOR_MPRIS_PLAYER_STATUS_STOPPED "Stopped"
+#define PUNCTOR_MPRIS_PLAYER_STATUS_PLAYING "Playing"
+#define PUNCTOR_MPRIS_PLAYER_STATUS_PAUSED "Paused"
 
 
 MediaControl::MediaControl()
@@ -68,11 +72,11 @@ MediaControl::MediaStatus MediaControl::getStatus(QString playerID)
                          PUNCTOR_MPRIS_PLAYER_INTERFACE);
     QString status = iface.property(PUNCTOR_MPRIS_PLAYER_PROP_STATUS)
                           .toString();
-    if (status == "Stopped")
+    if (status == PUNCTOR_MPRIS_PLAYER_STATUS_STOPPED)
         return status_stopped;
-    else if (status == "Playing")
+    else if (status == PUNCTOR_MPRIS_PLAYER_STATUS_PLAYING)
         return status_playing;
-    else if (status == "Paused")
+    else if (status == PUNCTOR_MPRIS_PLAYER_STATUS_PAUSED)
         return status_paused;
     return status_unknown;
 }
@@ -82,7 +86,12 @@ void MediaControl::play(QString playerID)
     QDBusInterface iface(playerID,
                          PUNCTOR_MPRIS_OBJECT_PATH,
                          PUNCTOR_MPRIS_PLAYER_INTERFACE);
-    iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_PLAY);
+    QString status = iface.property(PUNCTOR_MPRIS_PLAYER_PROP_STATUS)
+                          .toString();
+    if (status == PUNCTOR_MPRIS_PLAYER_STATUS_STOPPED)
+        iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_PLAY);
+    else if (status == PUNCTOR_MPRIS_PLAYER_STATUS_PAUSED)
+        iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_RESUME);
 }
 
 void MediaControl::pause(QString playerID)
@@ -90,7 +99,10 @@ void MediaControl::pause(QString playerID)
     QDBusInterface iface(playerID,
                          PUNCTOR_MPRIS_OBJECT_PATH,
                          PUNCTOR_MPRIS_PLAYER_INTERFACE);
-    iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_PAUSE);
+    QString status = iface.property(PUNCTOR_MPRIS_PLAYER_PROP_STATUS)
+                          .toString();
+    if (status == PUNCTOR_MPRIS_PLAYER_STATUS_PLAYING)
+        iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_PAUSE);
 }
 
 void MediaControl::stop(QString playerID)
@@ -98,15 +110,18 @@ void MediaControl::stop(QString playerID)
     QDBusInterface iface(playerID,
                          PUNCTOR_MPRIS_OBJECT_PATH,
                          PUNCTOR_MPRIS_PLAYER_INTERFACE);
-    iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_STOP);
+    QString status = iface.property(PUNCTOR_MPRIS_PLAYER_PROP_STATUS)
+                          .toString();
+    if (status == PUNCTOR_MPRIS_PLAYER_STATUS_PLAYING)
+        iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_STOP);
 }
 
-void MediaControl::seek(QString playerID, qint64 pos)
+void MediaControl::seek(QString playerID, qint64 offset)
 {
     QDBusInterface iface(playerID,
                          PUNCTOR_MPRIS_OBJECT_PATH,
                          PUNCTOR_MPRIS_PLAYER_INTERFACE);
-    iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_SEEK, pos);
+    iface.call(PUNCTOR_MPRIS_PLAYER_METHOD_SEEK, offset * 1000);
 }
 
 qint64 MediaControl::getPosition(QString playerID)
@@ -114,7 +129,7 @@ qint64 MediaControl::getPosition(QString playerID)
     QDBusInterface iface(playerID,
                          PUNCTOR_MPRIS_OBJECT_PATH,
                          PUNCTOR_MPRIS_PLAYER_INTERFACE);
-    return iface.property(PUNCTOR_MPRIS_PLAYER_PROP_POS).toLongLong();
+    return iface.property(PUNCTOR_MPRIS_PLAYER_PROP_POS).toLongLong() / 1000;
 }
 
 void MediaControl::previous(QString playerID)

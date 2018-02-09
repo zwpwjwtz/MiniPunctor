@@ -311,40 +311,64 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::on_bUDMin_clicked(int button)
 {
+    int offset;
     if (button)
-    {
-        currentTime -= 60000;
-        if (currentTime < 0)
-            currentTime = 0;
-    }
+        offset = -60000;
     else
-        currentTime += 60000;
+        offset = 60000;
+
+    currentTime += offset;
+    if (currentTime < 0)
+        currentTime = 0;
+
+    if (!bindedPlayer.isEmpty() && synchronized)
+    {
+        player.seek(bindedPlayer, offset);
+        currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
+    }
+
     showTime(currentTime);
 }
 
 void MainWindow::on_bUDSec_clicked(int button)
 {
+    int offset;
     if (button)
-    {
-        currentTime -= 1000;
-        if (currentTime < 0)
-            currentTime = 0;
-    }
+        offset = -1000;
     else
-        currentTime += 1000;
+        offset = 1000;
+
+    currentTime += offset;
+    if (currentTime < 0)
+        currentTime = 0;
+
+    if (!bindedPlayer.isEmpty() && synchronized)
+    {
+        player.seek(bindedPlayer, offset);
+        currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
+    }
+
     showTime(currentTime);
 }
 
 void MainWindow::on_bUDMsec_clicked(int button)
 {
+    int offset;
     if (button)
-    {
-        currentTime -= timerInterval;
-        if (currentTime < 0)
-            currentTime = 0;
-    }
+        offset = -timerInterval;
     else
-        currentTime += timerInterval;
+        offset = timerInterval;
+
+    currentTime += offset;
+    if (currentTime < 0)
+        currentTime = 0;
+
+    if (!bindedPlayer.isEmpty() && synchronized)
+    {
+        player.seek(bindedPlayer, offset);
+        currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
+    }
+
     showTime(currentTime);
 }
 
@@ -720,13 +744,8 @@ void MainWindow::on_menuBind_a_player_aboutToShow()
     int i;
     QList<QAction*> actionList = ui->menuBind_a_player->actions();
 
-    QString checkedAction;
     for (i=0; i<actionList.count(); i++)
-    {
-        if (actionList[i]->isChecked())
-            checkedAction = actionList[i]->text();
         ui->menuBind_a_player->removeAction(actionList[i]);
-    }
 
     int count = player.getPlayerList(playerNames, playerIDs);
     if (count < 1)
@@ -740,7 +759,7 @@ void MainWindow::on_menuBind_a_player_aboutToShow()
     {
         action = new QAction(playerNames[i], ui->menuBind_a_player);
         action->setCheckable(true);
-        if (checkedAction == playerNames[i])
+        if (bindedPlayer == playerIDs[i])
             action->setChecked(true);
         ui->menuBind_a_player->addAction(action);
     }
