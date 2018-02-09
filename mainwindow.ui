@@ -447,6 +447,7 @@
      <property name="title">
       <string>Bind a player</string>
      </property>
+     <addaction name="action_Not_available"/>
     </widget>
     <addaction name="separator"/>
     <addaction name="menuBind_a_player"/>
@@ -719,6 +720,11 @@
    </property>
    <property name="shortcut">
     <string>Alt+N</string>
+   </property>
+  </action>
+  <action name="action_Not_available">
+   <property name="text">
+    <string>(Not available)</string>
    </property>
   </action>
  </widget>

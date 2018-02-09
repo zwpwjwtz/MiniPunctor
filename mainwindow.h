@@ -8,8 +8,9 @@
 #include "tickshiftwindow.h"
 #include "filecontainer.h"
 #include "searchwindow.h"
+#ifndef Q_OS_WIN
 #include "mediacontrol.h"
-
+#endif
 
 namespace Ui {
 class MainWindow;
@@ -51,8 +52,6 @@ private slots:
     void on_listTimeline_doubleClicked(const QModelIndex &index);
     void on_listTimeline_customContextMenuRequested(const QPoint &pos);
 
-    void on_menuBind_a_player_aboutToShow();
-    void on_menuBind_a_player_triggered(QAction* action);
     void on_actionAbout_triggered();
     void on_actionExit_triggered();
     void on_actionSave_File_triggered();
@@ -77,13 +76,17 @@ private slots:
     void on_actionMove_up_triggered();
     void on_actionMove_down_triggered();
     void on_actionFollow_timer_triggered();
-    void on_actionDisable_2_triggered();
+#ifndef Q_OS_WIN
     void on_actionSynchronize_with_player_triggered();
     void on_actionShift_synchronization_triggered();
     void on_actionPlay_Pause_triggered();
     void on_actionStop_triggered();
     void on_actionPrevious_triggered();
     void on_actionNext_triggered();
+
+    void on_menuBind_a_player_aboutToShow();
+    void on_menuBind_a_player_triggered(QAction* action);
+#endif
 
 private:
     Ui::MainWindow *ui;
@@ -92,7 +95,9 @@ private:
     TickShiftWindow* tickShifter;
     SearchWindow* search;
     QMenu* menuTimeline;
+#ifndef Q_OS_WIN
     MediaControl player;
+#endif
     QTimer timer;
     FileContainer currentFile;
     TimeLine currentList;

@@ -321,11 +321,13 @@ void MainWindow::on_bUDMin_clicked(int button)
     if (currentTime < 0)
         currentTime = 0;
 
+#ifndef Q_OS_WIN
     if (!bindedPlayer.isEmpty() && synchronized)
     {
         player.seek(bindedPlayer, offset);
         currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
     }
+#endif
 
     showTime(currentTime);
 }
@@ -342,11 +344,13 @@ void MainWindow::on_bUDSec_clicked(int button)
     if (currentTime < 0)
         currentTime = 0;
 
+#ifndef Q_OS_WIN
     if (!bindedPlayer.isEmpty() && synchronized)
     {
         player.seek(bindedPlayer, offset);
         currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
     }
+#endif
 
     showTime(currentTime);
 }
@@ -363,11 +367,13 @@ void MainWindow::on_bUDMsec_clicked(int button)
     if (currentTime < 0)
         currentTime = 0;
 
+#ifndef Q_OS_WIN
     if (!bindedPlayer.isEmpty() && synchronized)
     {
         player.seek(bindedPlayer, offset);
         currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
     }
+#endif
 
     showTime(currentTime);
 }
@@ -386,15 +392,19 @@ void MainWindow::on_buttonStart_clicked()
     switch (timerState) {
     case PUNCTOR_TIMER_STATE_STOP:
     case PUNCTOR_TIMER_STATE_PAUSE:
+#ifndef Q_OS_WIN
         if (!bindedPlayer.isEmpty()  && synchronized)
             player.play(bindedPlayer);
+#endif
         startTimer(false);
         ui->buttonStart->setText("Pause");
         break;
     case PUNCTOR_TIMER_STATE_COUNTING:
         pauseTimer();
+#ifndef Q_OS_WIN
         if (!bindedPlayer.isEmpty() && synchronized)
             player.pause(bindedPlayer);
+#endif
         ui->buttonStart->setText("Resume");
     default:
         break;
@@ -404,8 +414,10 @@ void MainWindow::on_buttonStart_clicked()
 void MainWindow::on_buttonStop_clicked()
 {
     stopTimer();
+#ifndef Q_OS_WIN
     if (!bindedPlayer.isEmpty() && synchronized)
         player.stop(bindedPlayer);
+#endif
     ui->buttonStart->setText("Start");
 }
 
@@ -739,6 +751,7 @@ void MainWindow::on_listTimeline_customContextMenuRequested(const QPoint &pos)
     menuTimeline->exec(QCursor::pos());
 }
 
+#ifndef Q_OS_WIN
 void MainWindow::on_menuBind_a_player_aboutToShow()
 {
     int i;
@@ -779,6 +792,7 @@ void MainWindow::on_menuBind_a_player_triggered(QAction* action)
         }
     }
 }
+#endif
 
 bool MainWindow::on_actionCopy_triggered()
 {
@@ -1057,11 +1071,7 @@ void MainWindow::on_actionFollow_timer_triggered()
     followTimer = ui->actionFollow_timer->isChecked();
 }
 
-void MainWindow::on_actionDisable_2_triggered()
-{
-    bindedPlayer.clear();
-}
-
+#ifndef Q_OS_WIN
 void MainWindow::on_actionSynchronize_with_player_triggered()
 {
     synchronized = ui->actionSynchronize_with_player->isChecked();
@@ -1126,3 +1136,4 @@ void MainWindow::on_actionNext_triggered()
     if (synchronized)
         startTimer(true);
 }
+#endif
