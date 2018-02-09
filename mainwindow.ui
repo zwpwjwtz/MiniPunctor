@@ -236,10 +236,7 @@
       </rect>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <widget class="QPushButton" name="buttonListEdit">
       <property name="geometry">
@@ -321,10 +318,7 @@
       </rect>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <widget class="QPushButton" name="buttonListRemove">
       <property name="geometry">
@@ -637,9 +631,6 @@
    </property>
    <property name="text">
     <string>&amp;Follow timer</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

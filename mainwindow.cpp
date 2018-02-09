@@ -270,7 +270,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
     if (event->key() == Qt::Key_Space &&
-        event->modifiers() == Qt::KeyboardModifier::NoModifier)
+        event->modifiers() == Qt::NoModifier)
         on_buttonPunc_clicked();
 }
 

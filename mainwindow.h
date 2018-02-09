@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QModelIndex>
 #include <QTimer>
 #include "helpwindow.h"
 #include "tickeditwindow.h"

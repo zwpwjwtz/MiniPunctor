@@ -41,6 +41,7 @@ bool SearchWindow::checkInput(bool replace)
         return false;
     }
 
+    /*
     if (replace && ui->textReplace->toPlainText().isEmpty())
     {
         QMessageBox::warning(this,
@@ -48,6 +49,7 @@ bool SearchWindow::checkInput(bool replace)
                              "Please input the string to replace with!");
         return false;
     }
+    */
     return true;
 }
 
