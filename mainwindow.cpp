@@ -32,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->bUDMin->setText("Min");
     ui->bUDSec->setText("Sec");
     ui->bUDMsec->setText("Msec");
+    resize(500, 300);
+
     help = NULL;
     tickEditor = NULL;
     tickShifter = NULL;
@@ -253,18 +255,34 @@ void MainWindow::startTimer(bool reset)
 
     timer.start();
     timerState = PUNCTOR_TIMER_STATE_COUNTING;
+    ui->buttonStart->setText("Pause");
 }
 
 void MainWindow::stopTimer()
 {
     timer.stop();
     timerState = PUNCTOR_TIMER_STATE_STOP;
+    ui->buttonStart->setText("Start");
 }
 
 void MainWindow::pauseTimer()
 {
     timer.stop();
     timerState = PUNCTOR_TIMER_STATE_PAUSE;
+    ui->buttonStart->setText("Resume");
+}
+
+bool MainWindow::playerExists()
+{
+    if (bindedPlayer.isEmpty())
+    {
+        QMessageBox::warning(this, "No player binded",
+                             "The timer is not binded to any media player.\n"
+                             "Please choose a player from \"Player\" menu.");
+        return false;
+    }
+    else
+        return true;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -307,6 +325,22 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event)
 
 void MainWindow::resizeEvent(QResizeEvent* event)
 {
+    if (height() < 400)
+    {
+        ui->framePlayerCtrl->setVisible(false);
+        ui->buttonStart->move(10, 140);
+        ui->buttonStop->move(120, 140);
+        ui->buttonPunc->move(10, 184);       
+    }
+#ifndef Q_OS_WIN
+    else
+    {
+        ui->framePlayerCtrl->setVisible(true);
+        ui->buttonStart->move(10, 180);
+        ui->buttonStop->move(120, 180);
+        ui->buttonPunc->move(10, 224);
+    }
+#endif
     ui->buttonPunc->resize(ui->buttonPunc->width(),
                            this->height() - ui->buttonPunc->pos().y() - 40);
     ui->listTimeline->resize(this->width() - ui->listTimeline->pos().x() - 10,
@@ -404,17 +438,17 @@ void MainWindow::on_buttonStart_clicked()
 #ifndef Q_OS_WIN
         if (!bindedPlayer.isEmpty()  && synchronized)
             player.play(bindedPlayer);
+        ui->buttonPlayerPlay->setIcon(QIcon(":/icons/media-pause.png"));
 #endif
         startTimer(false);
-        ui->buttonStart->setText("Pause");
         break;
     case PUNCTOR_TIMER_STATE_COUNTING:
         pauseTimer();
 #ifndef Q_OS_WIN
         if (!bindedPlayer.isEmpty() && synchronized)
             player.pause(bindedPlayer);
+        ui->buttonPlayerPlay->setIcon(QIcon(":/icons/media-play.png"));
 #endif
-        ui->buttonStart->setText("Resume");
     default:
         break;
     }
@@ -427,7 +461,6 @@ void MainWindow::on_buttonStop_clicked()
     if (!bindedPlayer.isEmpty() && synchronized)
         player.stop(bindedPlayer);
 #endif
-    ui->buttonStart->setText("Start");
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -481,7 +514,7 @@ void MainWindow::on_actionSave_File_As_triggered()
     if (currentFile.saveAs(currentList, path) != FileContainer::fileOK)
     {
         QMessageBox::critical(this,"Error while saving file as",
-                              QString("Cannot save file as ""%1"""
+                              QString("Cannot save file as \"%1\""
                               "\nPlease check "
                               "if there is enough space on the disk,\n"
                               "and you have the permission to write file.")
@@ -560,7 +593,7 @@ void MainWindow::on_actionOpen_File_triggered()
                                   "Error while opening",
                                   QString("We are not able to parse "
                                   "the content of file \n"
-                                  """%1""\n"
+                                  "\"%1\"\n"
                                   "The file may be corrupted.").arg(path));
              return;
          }
@@ -706,8 +739,14 @@ void MainWindow::on_buttonListEdit_clicked()
     if (tickEditor->isModified())
     {
         currentList.updateItem(tick, i);
+        setFileModified(true);
         updateListItem(i);
     }
+}
+
+void MainWindow::on_buttonFollowTimer_clicked()
+{
+    ui->actionFollow_timer->trigger();
 }
 
 void MainWindow::on_listTimeline_doubleClicked(const QModelIndex &index)
@@ -1081,6 +1120,26 @@ void MainWindow::on_actionFollow_timer_triggered()
 }
 
 #ifndef Q_OS_WIN
+void MainWindow::on_buttonPlayerPlay_clicked()
+{
+    on_actionPlay_Pause_triggered();
+}
+
+void MainWindow::on_buttonPlayerStop_clicked()
+{
+    on_actionStop_triggered();
+}
+
+void MainWindow::on_buttonPlayerPrevious_clicked()
+{
+    on_actionPrevious_triggered();
+}
+
+void MainWindow::on_buttonPlayerNext_clicked()
+{
+    on_actionNext_triggered();
+}
+
 void MainWindow::on_actionSynchronize_with_player_triggered()
 {
     synchronized = ui->actionSynchronize_with_player->isChecked();
@@ -1100,49 +1159,57 @@ void MainWindow::on_actionShift_synchronization_triggered()
 
 void MainWindow::on_actionPlay_Pause_triggered()
 {
-    if (bindedPlayer.isEmpty())
+    if (!playerExists())
         return;
     if (player.getStatus(bindedPlayer) == MediaControl::status_playing)
     {
         player.pause(bindedPlayer);
         if (synchronized)
             pauseTimer();
+        ui->buttonPlayerPlay->setIcon(QIcon(":/icons/media-play.png"));
     }
     else
     {
         player.play(bindedPlayer);
         if (synchronized)
             startTimer(false);
+        ui->buttonPlayerPlay->setIcon(QIcon(":/icons/media-pause.png"));
     }
 }
 
 void MainWindow::on_actionStop_triggered()
 {
-    if (bindedPlayer.isEmpty())
+    if (!playerExists())
         return;
     player.stop(bindedPlayer);
 
     if (synchronized)
         stopTimer();
+
+    ui->buttonPlayerPlay->setIcon(QIcon(":/icons/media-play.png"));
 }
 
 void MainWindow::on_actionPrevious_triggered()
 {
-    if (bindedPlayer.isEmpty())
+    if (!playerExists())
         return;
     player.previous(bindedPlayer);
 
     if (synchronized)
         startTimer(true);
+
+    ui->buttonPlayerPlay->setIcon(QIcon(":/icons/media-pause.png"));
 }
 
 void MainWindow::on_actionNext_triggered()
 {
-    if (bindedPlayer.isEmpty())
+    if (!playerExists())
         return;
     player.next(bindedPlayer);
 
     if (synchronized)
         startTimer(true);
+
+    ui->buttonPlayerPlay->setIcon(QIcon(":/icons/media-pause.png"));
 }
 #endif

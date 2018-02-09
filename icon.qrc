@@ -8,5 +8,11 @@
         <file>icons/edit-delete.png</file>
         <file>icons/list-edit.png</file>
         <file>icons/MiniPunctor.png</file>
+        <file>icons/timer.png</file>
+        <file>icons/media-next.png</file>
+        <file>icons/media-pause.png</file>
+        <file>icons/media-previous.png</file>
+        <file>icons/media-stop.png</file>
+        <file>icons/media-play.png</file>
     </qresource>
 </RCC>

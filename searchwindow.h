@@ -35,7 +35,7 @@ private:
     Ui::SearchWindow *ui;
     int lastSearched;
 
-    bool checkInput(bool replace);
+    bool checkInput();
 };
 
 #endif // SearchWindow_H

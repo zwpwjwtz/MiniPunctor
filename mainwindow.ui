@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>300</height>
+    <height>340</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -62,7 +62,7 @@
     </property>
     <property name="font">
      <font>
-      <pointsize>20</pointsize>
+      <pointsize>18</pointsize>
      </font>
     </property>
     <property name="frameShape">
@@ -85,7 +85,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>140</y>
+      <y>186</y>
       <width>101</width>
       <height>35</height>
      </rect>
@@ -104,7 +104,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>140</y>
+      <y>186</y>
       <width>101</width>
       <height>35</height>
      </rect>
@@ -123,7 +123,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>184</y>
+      <y>230</y>
       <width>211</width>
       <height>71</height>
      </rect>
@@ -146,7 +146,7 @@
       <x>230</x>
       <y>30</y>
       <width>261</width>
-      <height>231</height>
+      <height>271</height>
      </rect>
     </property>
     <property name="contextMenuPolicy">
@@ -241,7 +241,7 @@
      <widget class="QPushButton" name="buttonListEdit">
       <property name="geometry">
        <rect>
-        <x>60</x>
+        <x>90</x>
         <y>0</y>
         <width>31</width>
         <height>31</height>
@@ -256,15 +256,15 @@
       </property>
       <property name="iconSize">
        <size>
-        <width>20</width>
-        <height>20</height>
+        <width>25</width>
+        <height>25</height>
        </size>
       </property>
      </widget>
      <widget class="QPushButton" name="buttonListMoveDown">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>60</x>
         <y>0</y>
         <width>31</width>
         <height>31</height>
@@ -287,7 +287,7 @@
      <widget class="QPushButton" name="buttonListMoveUp">
       <property name="geometry">
        <rect>
-        <x>0</x>
+        <x>30</x>
         <y>0</y>
         <width>31</width>
         <height>31</height>
@@ -305,6 +305,38 @@
         <width>20</width>
         <height>20</height>
        </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="buttonFollowTimer">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>31</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="toolTip">
+       <string>Hightlight current tick according to the timer</string>
+      </property>
+      <property name="icon">
+       <iconset resource="icon.qrc">
+        <normaloff>:/icons/timer.png</normaloff>:/icons/timer.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>25</width>
+        <height>25</height>
+       </size>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
     </widget>
@@ -368,6 +400,108 @@
      </widget>
     </widget>
    </widget>
+   <widget class="QFrame" name="framePlayerCtrl">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>139</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QPushButton" name="buttonPlayerPlay">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>41</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Play / pause music</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icon.qrc">
+       <normaloff>:/icons/media-play.png</normaloff>:/icons/media-play.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonPlayerNext">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>0</y>
+       <width>41</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Play next song</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icon.qrc">
+       <normaloff>:/icons/media-next.png</normaloff>:/icons/media-next.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonPlayerPrevious">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>0</y>
+       <width>41</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Play last song</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icon.qrc">
+       <normaloff>:/icons/media-previous.png</normaloff>:/icons/media-previous.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonPlayerStop">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>0</y>
+       <width>41</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Stop player</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icon.qrc">
+       <normaloff>:/icons/media-stop.png</normaloff>:/icons/media-stop.png</iconset>
+     </property>
+    </widget>
+   </widget>
+   <zorder>framePlayerCtrl</zorder>
+   <zorder>labelBanner</zorder>
+   <zorder>labelTime</zorder>
+   <zorder>buttonStart</zorder>
+   <zorder>buttonStop</zorder>
+   <zorder>buttonPunc</zorder>
+   <zorder>listTimeline</zorder>
+   <zorder>frameTimeAdj</zorder>
+   <zorder>frameListOperation</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -418,7 +552,7 @@
    </widget>
    <widget class="QMenu" name="menuTimeline">
     <property name="title">
-     <string>Timeline</string>
+     <string>&amp;Timeline</string>
     </property>
     <addaction name="actionMove_up"/>
     <addaction name="actionMove_down"/>
@@ -435,7 +569,7 @@
    </widget>
    <widget class="QMenu" name="menuPlayer">
     <property name="title">
-     <string>Player</string>
+     <string>&amp;Player</string>
     </property>
     <widget class="QMenu" name="menuBind_a_player">
      <property name="title">
@@ -641,7 +775,7 @@
   </action>
   <action name="actionClear_all_ticks">
    <property name="text">
-    <string>Clear all ticks</string>
+    <string>&amp;Clear all ticks</string>
    </property>
   </action>
   <action name="actionFollow_timer">
@@ -663,22 +797,12 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Synchronize with player</string>
+    <string>&amp;Synchronize with player</string>
    </property>
   </action>
   <action name="actionShift_synchronization">
    <property name="text">
-    <string>Shift synchronization</string>
-   </property>
-  </action>
-  <action name="actionDisable">
-   <property name="text">
-    <string>Disable</string>
-   </property>
-  </action>
-  <action name="actionDisable_2">
-   <property name="text">
-    <string>Disable</string>
+    <string>Shif&amp;t synchronization</string>
    </property>
   </action>
   <action name="actionPlay_Pause">
@@ -686,7 +810,7 @@
     <string>&amp;Play / Pause</string>
    </property>
    <property name="shortcut">
-    <string>Alt+P</string>
+    <string>F5</string>
    </property>
   </action>
   <action name="actionStop">
@@ -702,7 +826,7 @@
     <string>P&amp;revious</string>
    </property>
    <property name="shortcut">
-    <string>Alt+R</string>
+    <string>F2</string>
    </property>
   </action>
   <action name="actionNext">
@@ -710,7 +834,7 @@
     <string>&amp;Next</string>
    </property>
    <property name="shortcut">
-    <string>Alt+N</string>
+    <string>F3</string>
    </property>
   </action>
   <action name="action_Not_available">

@@ -31,7 +31,7 @@ SearchWindow::~SearchWindow()
     delete ui;
 }
 
-bool SearchWindow::checkInput(bool replace)
+bool SearchWindow::checkInput()
 {
     if (ui->textFind->toPlainText().isEmpty())
     {
@@ -65,7 +65,7 @@ void SearchWindow::on_buttonExit_clicked()
 
 void SearchWindow::on_buttonFind_clicked()
 {
-    if (!checkInput(false))
+    if (!checkInput())
         return;
 
     emit searchTimeline(ui->textFind->toPlainText(), lastSearched);
@@ -73,7 +73,7 @@ void SearchWindow::on_buttonFind_clicked()
 
 void SearchWindow::on_buttonReplace_clicked()
 {
-    if (!(ui->checkBox->isChecked() && checkInput(true)))
+    if (!(ui->checkBox->isChecked() && checkInput()))
         return;
 
     emit replaceTimeline(ui->textFind->toPlainText(),
@@ -83,7 +83,7 @@ void SearchWindow::on_buttonReplace_clicked()
 
 void SearchWindow::on_buttonReplaceAll_clicked()
 {
-    if (!(ui->checkBox->isChecked() && checkInput(true)))
+    if (!(ui->checkBox->isChecked() && checkInput()))
         return;
 
     emit replaceTimelineAll(ui->textFind->toPlainText(),

@@ -198,6 +198,9 @@ QString TimeLine::timeStampToString(qint64 timeStamp, QString format)
     int tempInt;
     static char buf[8];
 
+    if (timeStamp < 0 && format.at(0) != '+')
+        tempTime.prepend('-');
+
     timeStamp = std::abs(timeStamp) % 360000000;
     if (format.contains(PUNCTOR_TIME_FORMAT_HOUR))
     {

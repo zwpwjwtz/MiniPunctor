@@ -49,6 +49,7 @@ private slots:
     void on_buttonListEdit_clicked();
     void on_buttonListRemove_clicked();
     void on_buttonListInsert_clicked();
+    void on_buttonFollowTimer_clicked();
 
     void on_listTimeline_doubleClicked(const QModelIndex &index);
     void on_listTimeline_customContextMenuRequested(const QPoint &pos);
@@ -78,6 +79,11 @@ private slots:
     void on_actionMove_down_triggered();
     void on_actionFollow_timer_triggered();
 #ifndef Q_OS_WIN
+    void on_buttonPlayerPlay_clicked();
+    void on_buttonPlayerStop_clicked();
+    void on_buttonPlayerPrevious_clicked();
+    void on_buttonPlayerNext_clicked();
+
     void on_actionSynchronize_with_player_triggered();
     void on_actionShift_synchronization_triggered();
     void on_actionPlay_Pause_triggered();
@@ -132,6 +138,7 @@ private:
     void startTimer(bool reset);
     void stopTimer();
     void pauseTimer();
+    bool playerExists();
 
 protected:
     void closeEvent(QCloseEvent* event);
