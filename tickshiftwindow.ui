@@ -10,28 +10,25 @@
     <height>146</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Dialog</string>
-  </property>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="labelPrompt">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>151</width>
+     <width>201</width>
      <height>24</height>
     </rect>
    </property>
    <property name="text">
-    <string>Shift ticks with :</string>
+    <string>Shift item with :</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="textInput">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>220</x>
      <y>10</y>
-     <width>191</width>
+     <width>151</width>
      <height>38</height>
     </rect>
    </property>

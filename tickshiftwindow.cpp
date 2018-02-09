@@ -17,6 +17,11 @@ TickShiftWindow::~TickShiftWindow()
     delete ui;
 }
 
+void TickShiftWindow::setPrompt(const QString text)
+{
+    ui->labelPrompt->setText(text);
+}
+
 void TickShiftWindow::on_buttonOK_clicked()
 {
     bool ok;

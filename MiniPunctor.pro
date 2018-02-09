@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     timeline.cpp \
     tickeditwindow.cpp \
     searchwindow.cpp \
-    tickshiftwindow.cpp
+    tickshiftwindow.cpp \
+    mediacontrol.cpp
 
 HEADERS  += mainwindow.h \
     helpwindow.h \
@@ -47,7 +48,8 @@ HEADERS  += mainwindow.h \
     file_format.h \
     tickeditwindow.h \
     searchwindow.h \
-    tickshiftwindow.h
+    tickshiftwindow.h \
+    mediacontrol.h
 
 FORMS    += mainwindow.ui \
     helpwindow.ui \

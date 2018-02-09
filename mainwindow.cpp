@@ -16,6 +16,11 @@
 #define PUNCTOR_FILE_SUFFIX_SRT "Subtitle file (*.srt)(*.srt)"
 #define PUNCTOR_FILE_SUFFIX_SMI "Windows Media Player Subtitle (*.smi)(*.smi)"
 
+#define PUNCTOR_TIMER_STATE_STOP        0
+#define PUNCTOR_TIMER_STATE_COUNTING    1
+#define PUNCTOR_TIMER_STATE_PAUSE       2
+
+
 bool Punctor_getSelectedItemIndex(QListWidget* list,
                                   QList<int>& indexList);
 
@@ -38,9 +43,10 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             SLOT(onTimerTimeout()));
 
-    timerState = 0;
+    timerState = PUNCTOR_TIMER_STATE_STOP;
     timerInterval = 100;
     timer.setInterval(timerInterval);
+    playerSyncShift = 0;
 
     currentTime = 0;
     showTime(currentTime);
@@ -49,9 +55,9 @@ MainWindow::MainWindow(QWidget *parent) :
     lastOpeningPath = ".";
     lastSavingPath = ".";
 
-    isPuncturing = false;
     fileModified = false;
     followTimer = true;
+    synchronized = true;
     lastSelectedIndex = -1;
 }
 
@@ -149,7 +155,7 @@ void MainWindow::moveSelectedArea(int delta)
 
 bool MainWindow::sureToExit(bool manualClose)
 {
-    if (!manualClose && isPuncturing)
+    if (!manualClose && timerState == PUNCTOR_TIMER_STATE_COUNTING)
     {
         if (QMessageBox::question(this,"Quit MiniPunctor",
                               "The program is puncturing now.\n"
@@ -236,6 +242,31 @@ void MainWindow::setFileModified(bool modified)
         updateTitle(currentFile.getFilePath());
 }
 
+void MainWindow::startTimer(bool reset)
+{
+    if (timerState == PUNCTOR_TIMER_STATE_STOP || reset)
+    {
+        currentTime = 0;
+        if (synchronized)
+            currentTime = playerSyncShift;
+    }
+
+    timer.start();
+    timerState = PUNCTOR_TIMER_STATE_COUNTING;
+}
+
+void MainWindow::stopTimer()
+{
+    timer.stop();
+    timerState = PUNCTOR_TIMER_STATE_STOP;
+}
+
+void MainWindow::pauseTimer()
+{
+    timer.stop();
+    timerState = PUNCTOR_TIMER_STATE_PAUSE;
+}
+
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     if (sureToExit(false))
@@ -289,40 +320,70 @@ void MainWindow::resizeEvent(QResizeEvent* event)
 
 void MainWindow::on_bUDMin_clicked(int button)
 {
+    int offset;
     if (button)
-    {
-        currentTime -= 60000;
-        if (currentTime < 0)
-            currentTime = 0;
-    }
+        offset = -60000;
     else
-        currentTime += 60000;
+        offset = 60000;
+
+    currentTime += offset;
+    if (currentTime < 0)
+        currentTime = 0;
+
+#ifndef Q_OS_WIN
+    if (!bindedPlayer.isEmpty() && synchronized)
+    {
+        player.seek(bindedPlayer, offset);
+        currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
+    }
+#endif
+
     showTime(currentTime);
 }
 
 void MainWindow::on_bUDSec_clicked(int button)
 {
+    int offset;
     if (button)
-    {
-        currentTime -= 1000;
-        if (currentTime < 0)
-            currentTime = 0;
-    }
+        offset = -1000;
     else
-        currentTime += 1000;
+        offset = 1000;
+
+    currentTime += offset;
+    if (currentTime < 0)
+        currentTime = 0;
+
+#ifndef Q_OS_WIN
+    if (!bindedPlayer.isEmpty() && synchronized)
+    {
+        player.seek(bindedPlayer, offset);
+        currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
+    }
+#endif
+
     showTime(currentTime);
 }
 
 void MainWindow::on_bUDMsec_clicked(int button)
 {
+    int offset;
     if (button)
-    {
-        currentTime -= timerInterval;
-        if (currentTime < 0)
-            currentTime = 0;
-    }
+        offset = -timerInterval;
     else
-        currentTime += timerInterval;
+        offset = timerInterval;
+
+    currentTime += offset;
+    if (currentTime < 0)
+        currentTime = 0;
+
+#ifndef Q_OS_WIN
+    if (!bindedPlayer.isEmpty() && synchronized)
+    {
+        player.seek(bindedPlayer, offset);
+        currentTime = player.getPosition(bindedPlayer) + playerSyncShift;
+    }
+#endif
+
     showTime(currentTime);
 }
 
@@ -338,18 +399,21 @@ void MainWindow::on_buttonPunc_clicked()
 void MainWindow::on_buttonStart_clicked()
 {
     switch (timerState) {
-    case 0: //Stop
-        currentTime = 0;
-    case 2: //Pause
-        timerState = 1;
-        isPuncturing = true;
-        timer.start();
+    case PUNCTOR_TIMER_STATE_STOP:
+    case PUNCTOR_TIMER_STATE_PAUSE:
+#ifndef Q_OS_WIN
+        if (!bindedPlayer.isEmpty()  && synchronized)
+            player.play(bindedPlayer);
+#endif
+        startTimer(false);
         ui->buttonStart->setText("Pause");
         break;
-    case 1: //Counting
-        timerState = 2;
-        isPuncturing =false;
-        timer.stop();
+    case PUNCTOR_TIMER_STATE_COUNTING:
+        pauseTimer();
+#ifndef Q_OS_WIN
+        if (!bindedPlayer.isEmpty() && synchronized)
+            player.pause(bindedPlayer);
+#endif
         ui->buttonStart->setText("Resume");
     default:
         break;
@@ -358,9 +422,11 @@ void MainWindow::on_buttonStart_clicked()
 
 void MainWindow::on_buttonStop_clicked()
 {
-    timerState = 0;
-    isPuncturing = false;
-    timer.stop();
+    stopTimer();
+#ifndef Q_OS_WIN
+    if (!bindedPlayer.isEmpty() && synchronized)
+        player.stop(bindedPlayer);
+#endif
     ui->buttonStart->setText("Start");
 }
 
@@ -694,6 +760,49 @@ void MainWindow::on_listTimeline_customContextMenuRequested(const QPoint &pos)
     menuTimeline->exec(QCursor::pos());
 }
 
+#ifndef Q_OS_WIN
+void MainWindow::on_menuBind_a_player_aboutToShow()
+{
+    int i;
+    QList<QAction*> actionList = ui->menuBind_a_player->actions();
+
+    for (i=0; i<actionList.count(); i++)
+        ui->menuBind_a_player->removeAction(actionList[i]);
+
+    int count = player.getPlayerList(playerNames, playerIDs);
+    if (count < 1)
+    {
+        ui->menuBind_a_player->addAction("(No player detected)");
+        return;
+    }
+
+    QAction* action;
+    for (i=0; i<playerNames.count(); i++)
+    {
+        action = new QAction(playerNames[i], ui->menuBind_a_player);
+        action->setCheckable(true);
+        if (bindedPlayer == playerIDs[i])
+            action->setChecked(true);
+        ui->menuBind_a_player->addAction(action);
+    }
+}
+
+void MainWindow::on_menuBind_a_player_triggered(QAction* action)
+{
+    for (int i=0; i<playerNames.count(); i++)
+    {
+        if (playerNames[i] == action->text())
+        {
+            if (action->isChecked())
+                bindedPlayer = playerIDs[i];
+            else
+                bindedPlayer.clear();
+            break;
+        }
+    }
+}
+#endif
+
 bool MainWindow::on_actionCopy_triggered()
 {
     QList<int> indexList;
@@ -843,6 +952,7 @@ void MainWindow::on_actionAdjust_selected_triggered()
 {
     if (!tickShifter)
         tickShifter = new TickShiftWindow(this);
+    tickShifter->setPrompt("Shift selected tick with:");
     tickShifter->exec();
     if (tickShifter->accepted)
     {
@@ -969,3 +1079,70 @@ void MainWindow::on_actionFollow_timer_triggered()
 {
     followTimer = ui->actionFollow_timer->isChecked();
 }
+
+#ifndef Q_OS_WIN
+void MainWindow::on_actionSynchronize_with_player_triggered()
+{
+    synchronized = ui->actionSynchronize_with_player->isChecked();
+}
+
+void MainWindow::on_actionShift_synchronization_triggered()
+{
+    if (!tickShifter)
+    {
+        tickShifter = new TickShiftWindow;
+    }
+    tickShifter->setPrompt("Set player sync. shift:");
+    tickShifter->exec();
+    if (tickShifter->accepted)
+        playerSyncShift = tickShifter->shiftValue;
+}
+
+void MainWindow::on_actionPlay_Pause_triggered()
+{
+    if (bindedPlayer.isEmpty())
+        return;
+    if (player.getStatus(bindedPlayer) == MediaControl::status_playing)
+    {
+        player.pause(bindedPlayer);
+        if (synchronized)
+            pauseTimer();
+    }
+    else
+    {
+        player.play(bindedPlayer);
+        if (synchronized)
+            startTimer(false);
+    }
+}
+
+void MainWindow::on_actionStop_triggered()
+{
+    if (bindedPlayer.isEmpty())
+        return;
+    player.stop(bindedPlayer);
+
+    if (synchronized)
+        stopTimer();
+}
+
+void MainWindow::on_actionPrevious_triggered()
+{
+    if (bindedPlayer.isEmpty())
+        return;
+    player.previous(bindedPlayer);
+
+    if (synchronized)
+        startTimer(true);
+}
+
+void MainWindow::on_actionNext_triggered()
+{
+    if (bindedPlayer.isEmpty())
+        return;
+    player.next(bindedPlayer);
+
+    if (synchronized)
+        startTimer(true);
+}
+#endif
